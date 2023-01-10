@@ -1,5 +1,4 @@
 # Import libraries
-from turtle import width
 import streamlit as st
 from PIL import Image
 
