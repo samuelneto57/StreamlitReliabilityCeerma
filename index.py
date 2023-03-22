@@ -53,27 +53,29 @@ if first_menu == "Parametrics and Non-Parametrics Models":
 
 
 if first_menu == "Accelerated life testing":
-    add_selectbox = st.sidebar.selectbox(
-        "Which submodule do you want to use?",
-        ("Select a submodule", "Accelerated life testing")
-    )
+    show_alt.show()
+    # add_selectbox = st.sidebar.selectbox(
+    #     "Which submodule do you want to use?",
+    #     ("Select a submodule", "Accelerated life testing")
+    # )
 
-    if add_selectbox == "Select a module":
-        pass
-    if add_selectbox == "Accelerated life testing":
-        show_alt.show()
+    # if add_selectbox == "Select a module":
+    #     pass
+    # if add_selectbox == "Accelerated life testing":
+    #     show_alt.show()
 
 
 if first_menu == "Repairable Systems":
-    add_selectbox = st.sidebar.selectbox(
-        "Which submodule do you want to use?",
-        ("Select a submodule", "Repairable Systems")
-    )
+    show_repairable.show()
+    # add_selectbox = st.sidebar.selectbox(
+    #     "Which submodule do you want to use?",
+    #     ("Select a submodule", "Repairable Systems")
+    # )
 
-    if add_selectbox == "Select a module":
-        pass
-    if add_selectbox == "Repairable Systems":
-        show_repairable.show()
+    # if add_selectbox == "Select a module":
+    #     pass
+    # if add_selectbox == "Repairable Systems":
+    #     show_repairable.show()
 
 
 if first_menu == "Other Functions":

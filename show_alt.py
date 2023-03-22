@@ -168,7 +168,7 @@ def show():
     metric = st.radio('Choose a goodness of fit criteria', ('BIC', 'AICc', 'Log-likelihood'))
 
     IC = 0.8
-    print_results = False
+    print_results = True
     show_probability_plot = True
     show_life_stress_plot = True
 
