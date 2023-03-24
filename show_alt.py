@@ -108,6 +108,7 @@ def show():
         st.write('When using this module, please take into consideration the following points:')
         st.write('- There is no need to sort the data in any particular order as this is all done automatically;')
         st.write('- For each stress level, there must be at least one failure data;')
+        st.write('- For each stress level, number of points must be at least three, for single stress, or four, for dual stress.')
 
     expander = st.expander("Data format")
     expander.info('Upload an excel file thar contains the following columns: failure or right-censored time ("Time"), \
@@ -150,7 +151,7 @@ def show():
                     st.error('Enter two use level stresses')
         elif len(df.columns) == 3:
             if use_level:
-                if len(use_level) > 1:
+                if len(use_level) != 1:
                     st.error('Enter one use level stress')
                 else:
                     use_level = use_level[0]        
@@ -164,11 +165,11 @@ def show():
         include = st.multiselect('Choose which distribution(s) you want to fit to your data', dual_stress_ALT_models_list)
 
     method = st.radio('Choose the optimizer', ('TNC', 'L-BFGS-B'))
-    st.info('The optimizers are all bound constrained methods. If the bound constrained method fails, nelder-mead will be used. If nelder-mead fails the initial guess (using least squares) will be returned.')
+    st.info('The optimizers are all bound constrained methods. If the bound constrained method fails, nelder-mead will be used. If nelder-mead fails, the initial guess (using least squares) will be returned.')
     metric = st.radio('Choose a goodness of fit criteria', ('BIC', 'AICc', 'Log-likelihood'))
 
-    IC = 0.8
-    print_results = True
+    IC = 0.95
+    print_results = False
     show_probability_plot = True
     show_life_stress_plot = True
 
@@ -204,7 +205,7 @@ def show():
                         "n",
                         "beta",
                         "sigma",
-                        "Log-likelihood",
+                        "Log-LH",
                         "AICc",
                         "BIC",
                     ]
@@ -216,15 +217,15 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Weibull_Exponential",
-                            "a": res.a,
-                            "b": res.b,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
                             "c": "",
                             "n": "",
-                            "beta": res.beta,
+                            "beta": f'{res.beta:0.4f}',
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -241,6 +242,7 @@ def show():
                         best_model = res
                         best_model_name = 'Weibull_Exponential'
 
+
                 if 'Weibull_Eyring' in include:
                     res = Fit_Weibull_Eyring(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
@@ -248,15 +250,15 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Weibull_Eyring",
-                            "a": res.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "n": "",
-                            "beta": res.beta,
+                            "beta": f'{res.beta:0.4f}',
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -281,15 +283,15 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Weibull_Power",
-                            "a": res.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
                             "c": "",
-                            "n": res.n,
-                            "beta": res.beta,
+                            "n": f'{res.n:0.4f}',
+                            "beta": f'{res.beta:0.4f}',
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -302,7 +304,7 @@ def show():
                         best_model = res
                         best_model_name = 'Weibull_Power'
                     if -res.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res.loglik
+                        best_loglik = -res.loglikAICc
                         best_model = res
                         best_model_name = 'Weibull_Power'
 
@@ -313,15 +315,15 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Lognormal_Exponential",
-                            "a": res.a,
-                            "b": res.b,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
                             "c": "",
                             "n": "",
                             "beta": "",
-                            "sigma": res.sigma,
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -339,259 +341,259 @@ def show():
                         best_model_name = 'Lognormal_Exponential'
 
                 if 'Lognormal_Eyring' in include:
-                    res_Lognormal_Eyring = Fit_Lognormal_Eyring(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Lognormal_Eyring(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Lognormal_Eyring",
-                            "a": res_Lognormal_Eyring.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
-                            "c": res_Lognormal_Eyring.c,
+                            "c": f'{res.c:0.4f}',
                             "n": "",
                             "beta": "",
-                            "sigma": res_Lognormal_Eyring.sigma,
-                            "Log-likelihood": res_Lognormal_Eyring.loglik,
-                            "AICc": res_Lognormal_Eyring.AICc,
-                            "BIC": res_Lognormal_Eyring.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Lognormal_Eyring.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Lognormal_Eyring.BIC
-                        best_model = res_Lognormal_Eyring
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Lognormal_Eyring'
-                    if res_Lognormal_Eyring.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Lognormal_Eyring.AICc
-                        best_model = res_Lognormal_Eyring
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Lognormal_Eyring'
-                    if -res_Lognormal_Eyring.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Lognormal_Eyring.loglik
-                        best_model = res_Lognormal_Eyring
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Lognormal_Eyring'
 
                 if 'Lognormal_Power' in include:
-                    res_Lognormal_Power = Fit_Lognormal_Power(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Lognormal_Power(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Lognormal_Power",
-                            "a": res_Lognormal_Power.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
                             "c": "",
-                            "n": res_Lognormal_Power.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
-                            "sigma": res_Lognormal_Power.sigma,
-                            "Log-likelihood": res_Lognormal_Power.loglik,
-                            "AICc": res_Lognormal_Power.AICc,
-                            "BIC": res_Lognormal_Power.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Lognormal_Power.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Lognormal_Power.BIC
-                        best_model = res_Lognormal_Power
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Lognormal_Power'
-                    if res_Lognormal_Power.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Lognormal_Power.AICc
-                        best_model = res_Lognormal_Power
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Lognormal_Power'
-                    if -res_Lognormal_Power.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Lognormal_Power.loglik
-                        best_model = res_Lognormal_Power
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Lognormal_Power'
 
                 if 'Normal_Exponential' in include:
-                    res_Normal_Exponential = Fit_Normal_Exponential(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Normal_Exponential(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Normal_Exponential",
-                            "a": res_Normal_Exponential.a,
-                            "b": res_Normal_Exponential.b,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
                             "c": "",
                             "n": "",
                             "beta": "",
-                            "sigma": res_Normal_Exponential.sigma,
-                            "Log-likelihood": res_Normal_Exponential.loglik,
-                            "AICc": res_Normal_Exponential.AICc,
-                            "BIC": res_Normal_Exponential.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Normal_Exponential.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Normal_Exponential.BIC
-                        best_model = res_Normal_Exponential
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Normal_Exponential'
-                    if res_Normal_Exponential.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Normal_Exponential.AICc
-                        best_model = res_Normal_Exponential
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Normal_Exponential'
-                    if -res_Normal_Exponential.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Normal_Exponential.loglik
-                        best_model = res_Normal_Exponential
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Normal_Exponential'
 
                 if 'Normal_Eyring' in include:
-                    res_Normal_Eyring = Fit_Normal_Eyring(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Normal_Eyring(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Normal_Eyring",
-                            "a": res_Normal_Eyring.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
-                            "c": res_Normal_Eyring.c,
+                            "c": f'{res.c:0.4f}',
                             "n": "",
                             "beta": "",
-                            "sigma": res_Normal_Eyring.sigma,
-                            "Log-likelihood": res_Normal_Eyring.loglik,
-                            "AICc": res_Normal_Eyring.AICc,
-                            "BIC": res_Normal_Eyring.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Normal_Eyring.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Normal_Eyring.BIC
-                        best_model = res_Normal_Eyring
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Normal_Eyring'
-                    if res_Normal_Eyring.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Normal_Eyring.AICc
-                        best_model = res_Normal_Eyring
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Normal_Eyring'
-                    if -res_Normal_Eyring.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Normal_Eyring.loglik
-                        best_model = res_Normal_Eyring
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Normal_Eyring'
 
                 if 'Normal_Power' in include:
-                    res_Normal_Power = Fit_Normal_Power(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Normal_Power(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Normal_Power",
-                            "a": res_Normal_Power.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
                             "c": "",
-                            "n": res_Normal_Power.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
-                            "sigma": res_Normal_Power.sigma,
-                            "Log-likelihood": res_Normal_Power.loglik,
-                            "AICc": res_Normal_Power.AICc,
-                            "BIC": res_Normal_Power.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Normal_Power.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Normal_Power.BIC
-                        best_model = res_Normal_Power
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Normal_Power'
-                    if res_Normal_Power.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Normal_Power.AICc
-                        best_model = res_Normal_Power
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Normal_Power'
-                    if -res_Normal_Power.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Normal_Power.loglik
-                        best_model = res_Normal_Power
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Normal_Power'
 
                 if 'Exponential_Exponential' in include:
-                    res_Exponential_Exponential = Fit_Exponential_Exponential(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Exponential_Exponential(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Exponential_Exponential",
-                            "a": res_Exponential_Exponential.a,
-                            "b": res_Exponential_Exponential.b,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
                             "c": "",
                             "n": "",
                             "beta": "",
                             "sigma": "",
-                            "Log-likelihood": res_Exponential_Exponential.loglik,
-                            "AICc": res_Exponential_Exponential.AICc,
-                            "BIC": res_Exponential_Exponential.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Exponential_Exponential.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Exponential_Exponential.BIC
-                        best_model = res_Exponential_Exponential
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Exponential_Exponential'
-                    if res_Exponential_Exponential.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Exponential_Exponential.AICc
-                        best_model = res_Exponential_Exponential
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Exponential_Exponential'
-                    if -res_Exponential_Exponential.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Exponential_Exponential.loglik
-                        best_model = res_Exponential_Exponential
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Exponential_Exponential'
 
                 if 'Exponential_Eyring' in include:
-                    res_Exponential_Eyring = Fit_Exponential_Eyring(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Exponential_Eyring(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Exponential_Eyring",
-                            "a": res_Exponential_Eyring.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
-                            "c": res_Exponential_Eyring.c,
+                            "c": f'{res.c:0.4f}',
                             "n": "",
                             "beta": "",
                             "sigma": "",
-                            "Log-likelihood": res_Exponential_Eyring.loglik,
-                            "AICc": res_Exponential_Eyring.AICc,
-                            "BIC": res_Exponential_Eyring.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Exponential_Eyring.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Exponential_Eyring.BIC
-                        best_model = res_Exponential_Eyring
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Exponential_Eyring'
-                    if res_Exponential_Eyring.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Exponential_Eyring.AICc
-                        best_model = res_Exponential_Eyring
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Exponential_Eyring'
-                    if -res_Exponential_Eyring.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Exponential_Eyring.loglik
-                        best_model = res_Exponential_Eyring
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Exponential_Eyring'
 
                 if 'Exponential_Power' in include:
-                    res_Exponential_Power = Fit_Exponential_Power(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
+                    res = Fit_Exponential_Power(failures=ftime, failure_stress=fstress_1, right_censored=ctime, \
                     right_censored_stress=cstress_1, use_level_stress=use_level, print_results=print_results, \
                     show_probability_plot=show_probability_plot, show_life_stress_plot=show_life_stress_plot, CI=IC, optimizer=method)
                     results = results.append(
                         {
                             "ALT_model": "Exponential_Power",
-                            "a": res_Exponential_Power.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
                             "c": "",
-                            "n": res_Exponential_Power.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
                             "sigma": "",
-                            "Log-likelihood": res_Exponential_Power.loglik,
-                            "AICc": res_Exponential_Power.AICc,
-                            "BIC": res_Exponential_Power.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
-                    if res_Exponential_Power.BIC < best_BIC and metric == 'BIC':
-                        best_BIC = res_Exponential_Power.BIC
-                        best_model = res_Exponential_Power
+                    if res.BIC < best_BIC and metric == 'BIC':
+                        best_BIC = res.BIC
+                        best_model = res
                         best_model_name = 'Exponential_Power'
-                    if res_Exponential_Power.AICc < best_AICc and metric == 'AICc':
-                        best_AICc = res_Exponential_Power.AICc
-                        best_model = res_Exponential_Power
+                    if res.AICc < best_AICc and metric == 'AICc':
+                        best_AICc = res.AICc
+                        best_model = res
                         best_model_name = 'Exponential_Power'
-                    if -res_Exponential_Power.loglik < best_loglik and metric == 'Log-likelihood':
-                        best_loglik = -res_Exponential_Power.loglik
-                        best_model = res_Exponential_Power
+                    if -res.loglik < best_loglik and metric == 'Log-likelihood':
+                        best_loglik = -res.loglik
+                        best_model = res
                         best_model_name = 'Exponential_Power'
 
                 # # Recreate plt figure in plotly
@@ -632,7 +634,7 @@ def show():
                         "n",
                         "beta",
                         "sigma",
-                        "Log-likelihood",
+                        "Log-LH",
                         "AICc",
                         "BIC",
                     ]
@@ -646,16 +648,16 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Weibull_Dual_Exponential",
-                            "a": res.a,
-                            "b": res.b,
-                            "c": res.c,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
+                            "c": f'{res.c:0.4f}',
                             "m": "",
                             "n": "",
-                            "beta": res.beta,
+                            "beta": f'{res.beta:0.4f}',
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -680,16 +682,16 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Weibull_Power_Exponential",
-                            "a": res.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "m": "",
-                            "n": res.n,
-                            "beta": res.beta,
+                            "n": f'{res.n:0.4f}',
+                            "beta": f'{res.beta:0.4f}',
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -716,14 +718,14 @@ def show():
                             "ALT_model": "Weibull_Dual_Power",
                             "a": "",
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "m": res.m,
-                            "n": res.n,
-                            "beta": res.beta,
+                            "n": f'{res.n:0.4f}',
+                            "beta": f'{res.beta:0.4f}',
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -748,16 +750,16 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Lognormal_Dual_Exponential",
-                            "a": res.a,
-                            "b": res.b,
-                            "c": res.c,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
+                            "c": f'{res.c:0.4f}',
                             "m": "",
                             "n": "",
                             "beta": "",
-                            "sigma": res.sigma,
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -782,16 +784,16 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Lognormal_Power_Exponential",
-                            "a": res.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "m": "",
-                            "n": res.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
-                            "sigma": res.sigma,
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -818,14 +820,14 @@ def show():
                             "ALT_model": "Lognormal_Dual_Power",
                             "a": "",
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "m": res.m,
-                            "n": res.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
-                            "sigma": res.sigma,
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -850,16 +852,16 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Normal_Dual_Exponential",
-                            "a": res.a,
-                            "b": res.b,
-                            "c": res.c,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
+                            "c": f'{res.c:0.4f}',
                             "m": "",
                             "n": "",
                             "beta": "",
-                            "sigma": res.sigma,
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -886,14 +888,14 @@ def show():
                             "ALT_model": "Normal_Dual_Power",
                             "a": "",
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "m": res.m,
-                            "n": res.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
-                            "sigma": res.sigma,
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "sigma": f'{res.sigma:0.4f}',
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -918,16 +920,16 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Exponential_Dual_Exponential",
-                            "a": res.a,
-                            "b": res.b,
-                            "c": res.c,
+                            "a": f'{res.a:0.4f}',
+                            "b": f'{res.b:0.4f}',
+                            "c": f'{res.c:0.4f}',
                             "m": "",
                             "n": "",
                             "beta": "",
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -952,16 +954,16 @@ def show():
                     results = results.append(
                         {
                             "ALT_model": "Exponential_Power_Exponential",
-                            "a": res.a,
+                            "a": f'{res.a:0.4f}',
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "m": "",
-                            "n": res.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -988,14 +990,14 @@ def show():
                             "ALT_model": "Exponential_Dual_Power",
                             "a": "",
                             "b": "",
-                            "c": res.c,
+                            "c": f'{res.c:0.4f}',
                             "m": res.m,
-                            "n": res.n,
+                            "n": f'{res.n:0.4f}',
                             "beta": "",
                             "sigma": "",
-                            "Log-likelihood": res.loglik,
-                            "AICc": res.AICc,
-                            "BIC": res.BIC,
+                            "Log-LH": f'{res.loglik:0.4f}',
+                            "AICc": f'{res.AICc:.4f}',
+                            "BIC": f'{res.BIC:.4f}',
                         },
                         ignore_index=True,
                     )
@@ -1013,12 +1015,13 @@ def show():
                         best_model_name = 'Exponential_Dual_Power'
 
             st.write('## Results of all fitted ALT models')
-            # results = pd.DataFrame.from_dict(results)
+            results = pd.DataFrame.from_dict(results)
             st.write(results)
 
             st.write('## Results of the best fitted ALT model')
             st.write(best_model_name)
             st.write(best_model.results)
+            st.write(f'The mean life of best model is {best_model.mean_life:.4f}\n')
 
             probability_plot = best_model.probability_plot.figure
             life_stress_plot = best_model.life_stress_plot.figure

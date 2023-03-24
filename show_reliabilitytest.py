@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from reliability.Reliability_testing import one_sample_proportion, two_proportion_test, sample_size_no_failures
 
+# NOT FULLY IMPLEMENTED YET
 
 def show():
     #st.set_page_config(page_title="Parametric Model",page_icon="📈",layout="wide", initial_sidebar_state="expanded")

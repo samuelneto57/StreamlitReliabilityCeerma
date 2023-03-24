@@ -80,7 +80,7 @@ def show():
 
 
     if distribution_name == "Exponential Distribution":
-        var1_name, var2_name, var3_name= "Lambda", "Gamma" , "None"
+        var1_name, var2_name, var3_name = "Lambda", "Gamma" , "None"
         var1 = st.number_input("Scale parameter (Lambda)" , min_value= float(np.finfo(float).eps), value=10.0)
         var2 = st.number_input("Displacement parameter (Gamma)")
         dist_fun= Exponential_Distribution
@@ -228,8 +228,11 @@ def show():
 
 
     expander = st.expander("Plot parameter")
-    points_quality = expander.number_input('Number of points to plot', min_value=5,value = 1000, max_value = 100000 )
-    show_variable = expander.checkbox("Show distribution properties.", value=True, key=None)
+    points_quality = expander.number_input('Number of points to plot:', min_value=5, value = 5000, max_value = 100000 )
+    show_mean = expander.checkbox("Show distribution mean.", value=True, key=None)
+    show_median = expander.checkbox("Show distribution median.", value=True, key=None)
+    show_mode = expander.checkbox("Show distribution mode.", value=True, key=None)
+    axis_format = expander.checkbox("Show axis values in 0.00e+0 form.", value=False, key=None)
     st.write(" ")
     if st.button("Plot distribution"):
         
@@ -244,7 +247,7 @@ def show():
             properties_dist.text("""
             Mean: {}
             Median: {}
-            Mode:  No mode exists unless Alpha and Beta are greater than 1.
+            Mode: No mode exists unless both Alpha and Beta are greater than 1.
             Variance: {}
             Standard Deviation: {}
             Skewness: {} 
@@ -264,7 +267,7 @@ def show():
             """.format(dist.mean,dist.median ,dist.mode, dist.variance, dist.standard_deviation, dist.skewness, dist.kurtosis, dist.excess_kurtosis ) )
 
         if distribution_name == "Loglogistic Distribution" and var2 <=1:
-            st.write("No plot when beta less or equal than 1")
+            st.write("No plot when beta less than or equal to 1")
         else:
             dist.PDF()    
             x_min,x_max = plt.gca().get_xlim()
@@ -275,22 +278,30 @@ def show():
             y_HF = dist.HF(xvals=x)
             y_CHF = dist.CHF(xvals=x)
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=x, y=y_PDF, mode='lines', name = 'PDF',  marker=dict(color = 'rgba(255, 223, 118, 0.9)'), visible = True))
+            fig.add_trace(go.Scatter(x=x, y=y_PDF, mode='lines', name = 'PDF',  marker=dict(color = 'rgba(255, 255, 0, 0.9)'), visible = True))
             fig.add_trace(go.Scatter(x=x, y=y_CDF, mode='lines', name = 'CDF',  marker=dict(color = 'rgba(255, 0, 0, 0.9)'), visible = 'legendonly'))
             fig.add_trace(go.Scatter(x=x, y=y_SF, mode='lines', name = 'SF',  marker=dict(color = 'rgba(0, 255, 0, 0.9)'), visible = 'legendonly'))
             fig.add_trace(go.Scatter(x=x, y=y_HF, mode='lines', name = 'HF',  marker=dict(color = 'rgba(0, 0, 255, 0.9)'), visible = 'legendonly'))
-            fig.add_trace(go.Scatter(x=x, y=y_CHF, mode='lines', name = 'CHF',  marker=dict(color = 'rgba(135, 45, 54, 0.9)'), visible = 'legendonly'))
-            if show_variable:
-                if distribution_name =="Normal Distribution":
-                    fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean, Median, Mode", annotation_position="top right")
-                elif distribution_name =="Beta Distribution" and (var1 <=1 or var2 <=1):
-                    fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
-                    fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
-                else:
-                    fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
-                    fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
-                    fig.add_vline(x=dist.mode, line_dash="dash", annotation_text="Mode", annotation_position="top right")
-            fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat='.2e'), xaxis=dict(tickformat='.2e'), updatemenus=updatemenus_log,title_text='Parametric Model - {} ({}) '.format(distribution_name,dist.param_title)) #size of figure
-            fig.update_xaxes(title = 'Time')
-            fig.update_yaxes(title = 'Probability density')			
-            st.plotly_chart(fig)
+            fig.add_trace(go.Scatter(x=x, y=y_CHF, mode='lines', name = 'CHF',  marker=dict(color = 'rgba(255, 0, 255, 0.9)'), visible = 'legendonly'))
+            if distribution_name =="Beta Distribution" and (var1 <=1 or var2 <=1):
+                show_mode = False
+            if distribution_name =="Normal Distribution":
+                show_median = False
+                show_mode = False
+            if show_mean:
+                fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
+            if show_median:
+                fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
+            if show_mode:
+                fig.add_vline(x=dist.mode, line_dash="dash", annotation_text="Mode", annotation_position="top right")
+            if axis_format:
+                tick_format = '0.2e'
+            else:
+                tick_format = '0.2f'
+            fig.update_layout(width=1900, height=600, title='Dados analisados', yaxis=dict(tickformat=tick_format), \
+                              xaxis=dict(tickformat=tick_format), updatemenus=updatemenus_log, \
+                                title_text='Parametric Model - {} ({}) '.format(distribution_name, dist.param_title), \
+                                    font_family="Times New Roman", title_font_family="Times New Roman")
+            fig.update_xaxes(title='Time')
+            fig.update_yaxes(title='Probability/Density')			
+            st.plotly_chart(fig, use_container_width=True)
