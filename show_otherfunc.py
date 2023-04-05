@@ -65,10 +65,10 @@ def show():
         )
     ]
 
-    st.title("Other Functions")
+    # st.title("Other Functions")
 
 
-    st.write("Stress and Strentgh")
+    st.title("Stress and Strentgh")
 
     st.write("Stress")
     col1, col2, col3, col4 = st.columns([3, 1,1,1 ])

@@ -12,6 +12,47 @@ from matplotlib.axes import SubplotBase
 from reliability.Utils import colorprint, round_to_decimals
 from scipy.optimize import curve_fit
 
+
+updatemenus_log = [
+    dict(
+        buttons=list([
+            dict(
+                args=[{'xaxis.type': '-', 'yaxis.type': '-'}],
+                label='Linear',
+                method='relayout'
+
+            ),
+            dict(
+                args=[{'xaxis.type': 'log', 'yaxis.type': '-'}],
+                label='Log-x',
+                method='relayout'
+
+            ),
+            dict(
+                args=[{'xaxis.type': '-', 'yaxis.type': 'log'}],
+                label='Log-y',
+                method='relayout'
+
+            ),
+            dict(
+                args=[{'xaxis.type': 'log', 'yaxis.type': 'log'}],
+                label='Log-xy',
+                method='relayout'
+
+            ),
+        ]),
+        direction="right",
+        type="buttons",
+        pad={"r": 10, "t": 10},
+        x=0.0,
+        xanchor="left",
+        y=1.115,
+        yanchor="top"                       
+
+    )
+]
+
+
 class reliability_growth:
     """
     Uses the Duane method to find the instantaneous MTBF and produce a
@@ -1082,47 +1123,7 @@ def show():
     st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
     #href_homepage = f'<a href="https://reliability.ceerma.com/" style="text-decoration: none; color :black;" > <button kind="primary" class="css-qbe2hs edgvbvh1">Go to Homepage</button></a>'
     #st.markdown(href_homepage, unsafe_allow_html=True)
-
-    updatemenus_log = [
-        dict(
-            buttons=list([
-                dict(
-                    args=[{'xaxis.type': '-', 'yaxis.type': '-'}],
-                    label='Linear',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': 'log', 'yaxis.type': '-'}],
-                    label='Log-x',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': '-', 'yaxis.type': 'log'}],
-                    label='Log-y',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': 'log', 'yaxis.type': 'log'}],
-                    label='Log-xy',
-                    method='relayout'
-
-                ),
-            ]),
-            direction="right",
-            type="buttons",
-            pad={"r": 10, "t": 10},
-            x=0.0,
-            xanchor="left",
-            y=1.115,
-            yanchor="top"                       
-
-        )
-    ]
-
-
+    
     st.title("Repairable Systems")
 
 
@@ -1136,13 +1137,21 @@ def show():
                         or NHPP (as good as old replacement, with the Restoration Factor equal to 1). \
                         Default is HPP, but this can be controled with the parameter Restorarion Factor.  ")
         helpbutton.info("Costs in the above context should include all associated costs of Preventive Maintenance and \
-                        Corective Maintenance. These are not just the costs associated with parts and labor but may also \
+                        Corrective Maintenance. These are not just the costs associated with parts and labor but may also \
                         include other costs such as: system downtime, loss of production output, and customer satisfaction.")
         pm = st.number_input(label='Preventative Maintenance Cost', min_value=0, format='%d')
         cm = st.number_input(label='Corrective Maintenance Cost', min_value=0, format='%d')
         alpha = st.number_input(label='Scale Parameter of the Weibull Distribution', min_value=0.)
         beta = st.number_input(label='Shape Parameter of the Weibull Distribution', min_value=1.)
-        q = st.radio(label='Restoration Factor.',options=np.array([0,1]))
+        # q = st.radio(label='Restoration Factor.',options=np.array([0,1]))
+        qq = st.radio(label='Restoration Type', options=[
+            'HPP (as good as new)',
+            'NHPP (as good as old)'
+        ])
+        if 'NHPP' in qq:
+            q = 1
+        elif 'HPP' in qq:
+            q = 0 
 
     if mod == "Mean cumulative function (MCF)":
         helpbutton = st.expander("Help")
@@ -1235,7 +1244,7 @@ def show():
                         (constant, increasing, decreasing) in the failure interarrival times. \
                         The ROCOF is only calculated if the trend is constant. If trend is not \
                         constant then ROCOF changes over time in accordance with the equation below \
-                        and the result only poits whether it is increasing or decreasing. \
+                        and the result only points whether it is increasing or decreasing. \
                         First, it is necessary to conduct a statistical test to determine if \
                         there is a statistically significant trend, and if there is a trend we \
                         can then model that trend, by estimating the parameters $\\beta$ and $\lambda$, \
