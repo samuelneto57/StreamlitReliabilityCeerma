@@ -197,8 +197,11 @@ def show():
 
 
     expander = st.expander("Plot parameter")
-    points_quality = expander.number_input('Number of points to plot', min_value=5,value = 1000, max_value = 100000 )
-    show_variable = expander.checkbox("Show distribution properties.", value=True, key=None)
+    points_quality = expander.number_input('Number of points to plot:', min_value=5, value = 5000, max_value = 100000 )
+    show_mean = expander.checkbox("Show distribution mean.", value=True, key=None)
+    show_median = expander.checkbox("Show distribution median.", value=True, key=None)
+    show_mode = expander.checkbox("Show distribution mode.", value=True, key=None)
+    axis_format = expander.checkbox("Show axis values in 0.00e+0 form.", value=False, key=None)
     st.write(" ")
 
     if st.button("Plot distribution"):
@@ -236,7 +239,17 @@ def show():
         fig.add_trace(go.Scatter(x=x, y=y_SF, mode='lines', name = 'SF',  marker=dict(color = 'rgba(0, 255, 0, 0.9)'), visible = 'legendonly'))
         fig.add_trace(go.Scatter(x=x, y=y_HF, mode='lines', name = 'HF',  marker=dict(color = 'rgba(0, 0, 255, 0.9)'), visible = 'legendonly'))
         fig.add_trace(go.Scatter(x=x, y=y_CHF, mode='lines', name = 'CHF',  marker=dict(color = 'rgba(135, 45, 54, 0.9)'), visible = 'legendonly'))
-        fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat='.2e'), xaxis=dict(tickformat='.2e'), updatemenus=updatemenus_log,title_text=' {}  '.format(Model_selected)) #size of figure
+        if show_mean:
+            fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
+        if show_median:
+            fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
+        if show_mode:
+            fig.add_vline(x=dist.mode, line_dash="dash", annotation_text="Mode", annotation_position="top right")
+        if axis_format:
+            tick_format = '0.2e'
+        else:
+            tick_format = '0.2f'
+        fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat=tick_format), xaxis=dict(tickformat=tick_format), updatemenus=updatemenus_log,title_text=' {}  '.format(Model_selected)) #size of figure
         fig.update_xaxes(title = 'Time')
         fig.update_yaxes(title = 'Probability density')			
         st.plotly_chart(fig)
