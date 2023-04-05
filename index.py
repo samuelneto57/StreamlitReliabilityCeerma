@@ -5,6 +5,7 @@ from PIL import Image
 
 image_ufpe = Image.open('./src/logo.png')
 image_pip = Image.open('./src/logopip.png')
+image_ceerma = Image.open('./src/favicon.png')
 
 hide_streamlit_style = """
 <style>
@@ -15,7 +16,7 @@ hide_streamlit_style = """
 
 """
 
-st.set_page_config(page_title="Reliability",page_icon="📈",layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Reliability",page_icon=image_ceerma,layout="wide", initial_sidebar_state="expanded")
 
 st.sidebar.image(image_ufpe)
 st.sidebar.write("")
@@ -30,8 +31,14 @@ for reliability related analysis and visualization using the Reliability Python 
 st.sidebar.write("")
 
 first_menu = st.sidebar.selectbox(
-    "Which module do you want to use?",
-    ("Select a module","Parametrics and Non-Parametrics Models", "Accelerated life testing", "Repairable Systems", "Other Functions")
+    "Which module do you want to use?",(
+    "Select a module",
+    "Parametrics and Non-Parametrics Models", 
+    "Accelerated Life Testing", 
+    "Repairable Systems", 
+    # "Other Functions"
+    "Stress and Strength"
+     )
 )
 
 if first_menu == "Parametrics and Non-Parametrics Models":
@@ -52,7 +59,7 @@ if first_menu == "Parametrics and Non-Parametrics Models":
         show_fitter.show()
 
 
-if first_menu == "Accelerated life testing":
+if first_menu == "Accelerated Life Testing":
     show_alt.show()
     # add_selectbox = st.sidebar.selectbox(
     #     "Which submodule do you want to use?",
@@ -77,14 +84,15 @@ if first_menu == "Repairable Systems":
     # if add_selectbox == "Repairable Systems":
     #     show_repairable.show()
 
+if first_menu == "Stress and Strength":
+    show_otherfunc.show()
+# if first_menu == "Other Functions":
+#     add_selectbox = st.sidebar.selectbox(
+#         "Which submodule do you want to use?",
+#         ("Select a submodule", "Stress and Strentgh")
+#     )
+#     if add_selectbox == "Select a module":
+#         pass
 
-if first_menu == "Other Functions":
-    add_selectbox = st.sidebar.selectbox(
-        "Which submodule do you want to use?",
-        ("Select a submodule", "Stress and Strentgh")
-    )
-    if add_selectbox == "Select a module":
-        pass
-
-    if add_selectbox == "Stress and Strentgh":
-        show_otherfunc.show()
+#     if add_selectbox == "Stress and Strentgh":
+#         show_otherfunc.show()
