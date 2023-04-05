@@ -107,22 +107,46 @@ def show():
     with st.expander(label='Help'):
         st.write('When using this module, please take into consideration the following points:')
         st.write('- There is no need to sort the data in any particular order as this is all done automatically;')
-        st.write('- For each stress level, there must be at least one failure data;')
-        st.write('- For each stress level, number of points must be at least three, for single stress, or four, for dual stress.')
+        st.write('- For each stress level, number of failure points must be at least three, for single stress, or four, for dual stress.')
+        st.write(" ")
+        st.write("""Accelerated Life Testing is implemented on Exponential, Weibull, 
+        Normal and Lognormal distributions. One of the parameters of the distribution will
+        be changed into a Life Model function L(S), which models the behaviour of the 
+        stress changes. The parameter changed is as follows:
+        """)
+        st.latex(r'\text{Exponential } \lambda = \frac{1}{L(S)}')
+        st.latex(r'\text{Weibull } \alpha = L(S)')
+        st.latex(r'\text{Normal } \mu = L(S)')
+        st.latex(r'\text{Lognormal } \mu = \ln\left(L(S)\right)')
+
+        st.write("L(S) function options are shown in Equation Information tab.")
+        
+    equation = st.expander("Equation Information")
+    equation.write("Single-stress models available:")
+    equation.latex(r'''\text{Exponential (or Arrhenius): } L(S)=b*\exp\left(\frac{a}{S}\right)''')
+    equation.latex(r"""\text{Eyring: } L(S)=\frac{1}{S}*\exp\left(-\left(c-\frac{a}{S}\right)\right)""")
+    equation.latex(r"""\text{Power (or Inverse Power Law): } L(S)=a*S^n""")
+    equation.write("Dual-stress models available:")
+    equation.latex(r"""\text{Dual-Exponential (or Temperature-Humidity): } L(S_1,S_2)=c*\exp\left(\frac{a}{S_1}+\frac{b}{S_2}\right)""")
+    equation.latex(r"""\text{Dual-Power: } L(S_1,S_2)=c*S_1^m*S_2^n""")
+    equation.latex(r"""\text{Power-Exponential (or Thermal-Nonthermal): } L(S_1,S_2)=c*\exp\left(\frac{a}{S_1}\right)*S_2^n""")
+    equation.info("""Although named Power-Exponential, this Life-Stress Model actually 
+    applies Exponential to stress 1 and Power to stress 2. You can simply shift the order 
+    of your input columns to switch which stress is affected by each function.""")
 
     expander = st.expander("Data format")
     expander.info('Upload an excel file thar contains the following columns: failure or right-censored time ("Time"), \
         the time type, if failure or right censored ("Type"), and the stress level (only "Stress1" or also "Stress2" for dual stress models).')
-    df_show = {'Time': [10, 15, 8, 20, 21, 12, 13, 30, 5], \
-        'Type': ['F', 'F', 'C', 'F', 'C', 'C', 'F', 'F', 'C'], \
-        'Stress1': [20, 20, 20, 40, 40, 40, 60, 60, 60],
-        'Stress2': [100, 100, 100, 200, 200, 200, 300, 300, 300],}
+    df_show = {'Time': [620,632,685,822,380,416,460,596,216,146,332,400],
+               'Type': ['F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F'],
+               'Stress1': [348,348,348,348,348,348,348,348,378,378,378,378],
+               'Stress2': [3,3,3,3,5,5,5,5,3,3,3,3],}
     df_show = pd.DataFrame.from_dict(df_show)
     expander.write(df_show, width=50)
     expander.info('The use level stress parameter is optional. If single stress model, enter only one value. For example:')
-    expander.write('10')
+    expander.write('348')
     expander.info('If dual stress model, enter two values separated by ",". For example: ')
-    expander.write('10, 50')
+    expander.write('348, 2')
 
     col2_1, col2_2 = st.columns(2)
     uploaded_file = col2_1.file_uploader("Upload a XLSX file", \
