@@ -60,18 +60,8 @@ def show():
         )
     ]
 
-
-
-
-
-
     st.title("Parametric Model")
     st.write("In this module, you can select and analyze the most common probability distributions in reliability ")
-
-
-
-
-
 
     distribution_name = st.selectbox( 'Select the distribution.', ('Exponential Distribution',
     'Normal Distribution', 'Beta Distribution', 'Gumbel Distribution' ,'Weibull Distribution', 'Lognormal Distribution',
@@ -228,7 +218,7 @@ def show():
 
 
     expander = st.expander("Plot parameter")
-    points_quality = expander.number_input('Number of points to plot:', min_value=5, value = 5000, max_value = 100000 )
+    points_quality = expander.number_input('Number of points to plot:', min_value=5, value=5000, max_value=100000 )
     show_mean = expander.checkbox("Show distribution mean.", value=True, key=None)
     show_median = expander.checkbox("Show distribution median.", value=True, key=None)
     show_mode = expander.checkbox("Show distribution mode.", value=True, key=None)

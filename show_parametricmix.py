@@ -68,13 +68,29 @@ def show():
     ## Select Model
     Model_selected = st.selectbox( 'Select Model.', ('Mixture Model', 'Competing Risk model'))
     if Model_selected == 'Mixture Model':
-        st.write("Mixture models are a combination of two or more distributions added together to create a distribution that has a shape with more flexibility than a single distribution. Each of the mixture’s components must be multiplied by a proportion, and the sum of all the proportions is equal to 1.")
+        st.write("""
+        Mixture models are a combination of two or more distributions 
+        added together to create a distribution that has a shape with 
+        more flexibility than a single distribution. Each of the 
+        mixture’s components must be multiplied by a proportion, and the 
+        sum of all the proportions is equal to 1.
+        """)
     if Model_selected == 'Competing Risk model':
-        st.write("Competing risks models are a combination of two or more distributions that represent failure modes which are “competing” to end the life of the system being modelled. This model is similar to a mixture model in the sense that it uses multiple distributions to create a new model that has a shape with more flexibility than a single distribution. However, unlike in mixture models, we are not adding proportions of the PDF or CDF, but are instead multiplying the survival functions.")
+        st.write("""
+        Competing risks models are a combination of two or more 
+        distributions that represent failure modes which are “competing” 
+        to end the life of the system being modelled. This model is 
+        similar to a mixture model in the sense that it uses multiple 
+        distributions to create a new model that has a shape with more 
+        flexibility than a single distribution. However, unlike in 
+        mixture models, we are not adding proportions of the PDF or CDF, 
+        but are instead multiplying the reliability (survival) functions.
+        """)
 
 
 
     number_distribution = st.number_input("N° of distributions:", min_value=1, max_value= 20)
+    st.write(" ")
     init_val= 1/number_distribution
 
     number_distribution =  int(number_distribution)

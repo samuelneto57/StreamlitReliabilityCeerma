@@ -30,34 +30,31 @@ for reliability related analysis and visualization using the Reliability Python 
 """)
 st.sidebar.write("")
 
-first_menu = st.sidebar.selectbox(
-    "Which module do you want to use?",(
+modules = (
     "Select a module",
     "Parametrics and Non-Parametrics Models", 
     "Accelerated Life Testing", 
     "Repairable Systems", 
     # "Other Functions"
     "Stress and Strength"
-     )
 )
 
+first_menu = st.sidebar.selectbox("Which module do you want to use?", modules)
+
 if first_menu == "Parametrics and Non-Parametrics Models":
-    add_selectbox = st.sidebar.selectbox(
-        "Which submodule do you want to use?",
-        ("Select a submodule", "Parametric Model", "Parametric Mix Model", "Non-Parametric model", "Fitter")
-    )
 
-    if add_selectbox == "Select a module":
-        pass
-    if add_selectbox == "Parametric Model":
-        show_parametricmodel.show()
-    if add_selectbox == "Parametric Mix Model":
-        show_parametricmix.show()
-    if add_selectbox == "Non-Parametric model":
-        show_comingsoon.show()
-    if add_selectbox == "Fitter":
-        show_fitter.show()
+    submodules = {
+        "Select a submodule": lambda: None,
+        "Parametric Model": show_parametricmodel.show,
+        "Parametric Mix Model": show_parametricmix.show,
+        # "Non-Parametric Model": show_comingsoon.show,
+        "Fitter": show_fitter.show
+    }
+    
+    add_selectbox = st.sidebar.selectbox("Which submodule do you want to use?", 
+                                         list(submodules))
 
+    submodules[add_selectbox]()
 
 if first_menu == "Accelerated Life Testing":
     show_alt.show()

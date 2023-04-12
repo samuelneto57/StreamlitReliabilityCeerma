@@ -84,7 +84,7 @@ def show():
     #     st.write('- The methods available to fit the distribution are: ‘MLE’ (maximum likelihood estimation), ‘LS’ (least squares estimation), ‘RRX’ (Rank regression on X), or ‘RRY’ (Rank regression on Y). LS will perform both RRX and RRY and return the better one.')
 
     expander = st.expander("Data format")
-    expander.info('Upload an excel file thar contains the following columns: failure or right-censored time ("Time"), and \
+    expander.info('Upload an excel file that contains the following columns: failure or right-censored time ("Time"), and \
         the time type, if failure or right censored ("Type").')
     df = {'Time': [10, 15, 8, 20, 21, 12, 13, 30, 5], \
         'Type': ['F', 'F', 'C', 'F', 'C', 'C', 'F', 'F', 'C']}
@@ -138,17 +138,20 @@ def show():
                 exc.extend(['Loglogistic_2P', 'Loglogistic_3P'])
 
         expander = st.expander("Plot parameter")
-        points_quality = expander.number_input('Number of points to plot', min_value=5,value = 1000, max_value = 100000 )
-        show_variable = expander.checkbox("Show distribution properties.", value=True, key=None)
-    else:
+        points_quality = expander.number_input('Number of points to plot:', min_value=5, value = 5000, max_value = 100000 )
+        show_mean = expander.checkbox("Show distribution mean.", value=True, key=None)
+        show_median = expander.checkbox("Show distribution median.", value=True, key=None)
+        show_mode = expander.checkbox("Show distribution mode.", value=True, key=None)
+        axis_format = expander.checkbox("Show axis values in 0.00e+0 form.", value=False, key=None)
+    elif mod == "Non-parametric":
         include = st.selectbox('Choose which distribution you want to fit to your data', ['Kaplan-Meier', 'Nelson-Aalen', 'Rank Adjustment'])
-        ci = st.number_input('CI', min_value=0., max_value=1., value=0.9)
+        ci = st.number_input('CI', min_value=0., max_value=1., value=0.95)
         par = st.checkbox('Do you want to compare the results with the fit to a parametric distribution?')
         if par == True:
             metric = st.radio('Choose a goodness of fit criteria', ('BIC', 'AICc', 'AD', 'Log-likelihood'))
             method = st.radio('Choose the method to fit the distribution', ('MLE', 'LS', 'RRX', 'RRY'))
         expander = st.expander("Plot parameter")
-        points_quality = expander.number_input('Number of points to plot', min_value=5,value = 1000, max_value = 100000 )
+        points_quality = expander.number_input('Number of points to plot', min_value=5, value=5000, max_value=100000)
     st.write(" ")
 
     if st.button("Fit distribution"):
@@ -165,6 +168,7 @@ def show():
                 show_histogram_plot=False, show_PP_plot=False, show_probability_plot=False, method=method)
 
             st.write('## Results of all fitted distributions')
+            results.results = results.results.applymap(str)
             st.write(results.results)
 
             st.write('## Results of the best fitted distribution')
@@ -172,7 +176,7 @@ def show():
             distribution_name = results.best_distribution_name
 
             percentiles = np.linspace(1, 99, num=99)						
-            IC = 0.8
+            IC = 0.9
 
             if distribution_name == 'Exponential_1P':
                 new_fit = Fit_Exponential_1P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
@@ -284,17 +288,17 @@ def show():
             
             
 
-            if show_variable:
-                if distribution_name =="Normal Distribution":
-                    fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean, Median, Mode", annotation_position="top right")
-                elif distribution_name =="Beta Distribution" and (var1 <=1 or var2 <=1):
-                    fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
-                    fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
-                else:
-                    fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
-                    fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
-                    fig.add_vline(x=dist.mode, line_dash="dash", annotation_text="Mode", annotation_position="top right")
-            fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat='.2e'), xaxis=dict(tickformat='.2e'), updatemenus=updatemenus_log,title_text='Parametric Model - {} ({}) '.format(distribution_name,dist.param_title)) #size of figure
+            if show_mean:
+                fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
+            if show_median:
+                fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
+            if show_mode:
+                fig.add_vline(x=dist.mode, line_dash="dash", annotation_text="Mode", annotation_position="top right")
+            if axis_format:
+                tick_format = '0.2e'
+            else:
+                tick_format = '0.2f'
+            fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat=tick_format), xaxis=dict(tickformat=tick_format), updatemenus=updatemenus_log,title_text='Parametric Model - {} ({}) '.format(distribution_name,dist.param_title)) #size of figure
             fig.update_xaxes(title = 'Time')
             fig.update_yaxes(title = 'Probability density')			
             st.plotly_chart(fig)
@@ -350,7 +354,7 @@ def show():
                 fig.add_trace(go.Scatter(x=x, y=y_CHF_par, mode='lines', name = 'CHF parametric - {}'.format(results.best_distribution_name),  marker=dict(color = colors[2]), visible = True, line=dict(dash='dot'))) 
 
 
-            fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat='.2e'), xaxis=dict(tickformat='.2e'), updatemenus=updatemenus_log,title_text='Non-parametric Model - {}'.format(include)) #size of figure
+            fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat=tick_format), xaxis=dict(tickformat=tick_format), updatemenus=updatemenus_log,title_text='Non-parametric Model - {}'.format(include)) #size of figure
             fig.update_xaxes(title = 'Time')
             fig.update_yaxes(title = 'Probability density')			
             st.plotly_chart(fig)

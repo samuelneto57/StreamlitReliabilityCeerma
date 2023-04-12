@@ -144,9 +144,9 @@ def show():
     df_show = pd.DataFrame.from_dict(df_show)
     expander.write(df_show, width=50)
     expander.info('The use level stress parameter is optional. If single stress model, enter only one value. For example:')
-    expander.write('348')
+    expander.write('323')
     expander.info('If dual stress model, enter two values separated by ",". For example: ')
-    expander.write('348, 2')
+    expander.write('323, 2')
 
     col2_1, col2_2 = st.columns(2)
     uploaded_file = col2_1.file_uploader("Upload a XLSX file", \
@@ -192,7 +192,7 @@ def show():
     st.info('The optimizers are all bound constrained methods. If the bound constrained method fails, nelder-mead will be used. If nelder-mead fails, the initial guess (using least squares) will be returned.')
     metric = st.radio('Choose a goodness of fit criteria', ('BIC', 'AICc', 'Log-likelihood'))
 
-    IC = 0.95
+    IC = 0.9
     print_results = False
     show_probability_plot = True
     show_life_stress_plot = True
