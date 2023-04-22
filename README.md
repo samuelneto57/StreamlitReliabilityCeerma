@@ -1,17 +1,16 @@
-# Reliability App CEERMA
+# Reliability App
 
-## How to use:
+This GitHub repository is the source code of the [Reliability App](https://reliabilityceerma.streamlit.app/), a website that implements the [Reliability](https://reliability.readthedocs.io/en/latest/) Python package, extending its visualization and interpretation capabilities. All graphs are interactive and were built using Plotly.
 
-- Create and activate virtual environment for project:
+## Use
+The code was tested in Python 3.9. To install the required packages simply run:
 
-python -m venv path/to/env/location/venv-reliability
-
-path/to/env/location/venv-reliability/Scripts/activate.bat
-
-- Install packages:
-
+```
 pip install -r requirements.txt
+```
 
-- Run app:
+To run the App locally:
 
+```
 streamlit run index.py
+```
