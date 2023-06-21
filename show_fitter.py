@@ -1,360 +1,185 @@
 import streamlit as st
-import reliability 
-import plotly.express as px
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from reliability.Fitters import Fit_Beta_2P, Fit_Everything, Fit_Exponential_1P, Fit_Exponential_2P, Fit_Gamma_2P, Fit_Gumbel_2P, Fit_Loglogistic_2P, Fit_Loglogistic_3P, Fit_Lognormal_2P, Fit_Lognormal_3P, Fit_Normal_2P, Fit_Weibull_2P, Fit_Weibull_3P, Fit_Gamma_3P
-from reliability.Distributions import Weibull_Distribution, Lognormal_Distribution, Exponential_Distribution, Normal_Distribution, Gamma_Distribution, Beta_Distribution, Loglogistic_Distribution, Gumbel_Distribution
-from reliability.Probability_plotting import plot_points, plotting_positions
-from reliability.Nonparametric import KaplanMeier, NelsonAalen, RankAdjustment
+from reliability.Fitters import Fit_Everything
+
+import distributions
+import functions
+
 
 def show():
-    #st.set_page_config(page_title="Fit distribution",page_icon="📈",layout="wide", initial_sidebar_state="expanded")
+    st.write("""
+    In this module, you can provide your data (complete or incomplete) and fit
+    either the most common parametric probability distributions in reliability
+    or some non-parametric models.
+    """)
 
-    hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    #ReportStatus {visibility: hidden;}
+    with st.expander("Data format"):
+        st.info("""
+        Upload an excel file that contains the following columns:
+        * Time - failure or right-censored time;
+        * Type - 'F' for failure time, 'C' for right-censored time.
+        """)
+        df = {'Time': [10, 15, 8, 20, 21, 12, 13, 30, 5],
+            'Type': ['F', 'F', 'C', 'F', 'C', 'C', 'F', 'F', 'C']}
+        df = pd.DataFrame.from_dict(df)
+        st.write(df)
 
-    </style>
-
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
-    #href_homepage = f'<a href="https://reliability.ceerma.com/" style="text-decoration: none; color :black;" > <button kind="primary" class="css-qbe2hs edgvbvh1">Go to Homepage</button></a>'
-    #st.markdown(href_homepage, unsafe_allow_html=True)
-
-    updatemenus_log = [
-        dict(
-            buttons=list([
-                dict(
-                    args=[{'xaxis.type': '-', 'yaxis.type': '-'}],
-                    label='Linear',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': 'log', 'yaxis.type': '-'}],
-                    label='Log-x',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': '-', 'yaxis.type': 'log'}],
-                    label='Log-y',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': 'log', 'yaxis.type': 'log'}],
-                    label='Log-xy',
-                    method='relayout'
-
-                ),
-            ]),
-            direction="right",
-            type="buttons",
-            pad={"r": 10, "t": 10},
-            x=0.0,
-            xanchor="left",
-            y=1.115,
-            yanchor="top"                       
-
-        )
-    ]
-
-    colors = px.colors.qualitative.Set1
-
-
-
-
-    st.title("Fit distribution")
-    st.write("In this module, you can provide your data (complete or incomplete) and fit the most common parametric probability distributions in reliability and also some non-parametric models.")
-
-    # with st.expander(label='Help'):
-    #     st.write('When using this module, please take into consideration the following points:')
-    #     st.write('- Distributions can be fitted to both complete and incomplete (right censored) data, you just need to specify the as failures or right_censored data')
-    #     st.write('- You must have at least as many failures as there are distribution parameters or the fit would be under-constrained.')
-    #     st.write('- It is generally advisable to have at least 4 data points as the accuracy of the fit is proportional to the amount of data.')
-    #     st.write('- If you have a very large amount of data (>100000 samples) then it is likely that your computer will take significant time to compute the results.')
-    #     st.write('- Heavily censored data (>99.9% censoring) may result in a failure of the optimizer to find a solution, or a poor description of your overall population statistic.')
-    #     st.write('- The goodness of fit criterions are available as AICc (Akaike Information Criterion corrected), BIC (Bayesian Information Criterion), AD (Anderson-Darling), and Log-likelihood (log-likelihood)')
-    #     st.write('- The methods available to fit the distribution are: ‘MLE’ (maximum likelihood estimation), ‘LS’ (least squares estimation), ‘RRX’ (Rank regression on X), or ‘RRY’ (Rank regression on Y). LS will perform both RRX and RRY and return the better one.')
-
-    expander = st.expander("Data format")
-    expander.info('Upload an excel file that contains the following columns: failure or right-censored time ("Time"), and \
-        the time type, if failure or right censored ("Type").')
-    df = {'Time': [10, 15, 8, 20, 21, 12, 13, 30, 5], \
-        'Type': ['F', 'F', 'C', 'F', 'C', 'C', 'F', 'F', 'C']}
-    df = pd.DataFrame.from_dict(df)
-    expander.write(df, width=50)
+    header = st.checkbox("Does your data contain header?", value=True)
+    head = 0 if header else None
 
     col2_1, col2_2 = st.columns(2)
-    uploaded_file = col2_1.file_uploader("Upload a XLSX file", \
-        type="xlsx", accept_multiple_files=False)
+    uploaded_file = col2_1.file_uploader("Upload a XLSX file:",
+                                         type="xlsx",
+                                         accept_multiple_files=False,
+                                         label_visibility="collapsed")
     if uploaded_file:
-        df = pd.read_excel(uploaded_file)
-        # sdf = df.style.format('{:10n}'.format)
+        df = pd.read_excel(uploaded_file, names=['Time', 'Type'], header=head)
         col2_2.dataframe(df)
+        df['Type'] = df['Type'].str.upper()
         fdata = df[df['Type'] == 'F']
-        fdata = np.array(fdata.iloc[:,0])
         cdata = df[df['Type'] == 'C']
+        fdata = np.array(fdata.iloc[:,0])
         cdata = np.array(cdata.iloc[:,0])
 
-    mod = st.selectbox("Which type of model would you like to fit?",("Parametric", "Non-parametric"))
+    mod = st.selectbox("Which type of models would you like to fit?",
+                       ("Parametric", "Non-parametric"))
+
     if mod == "Parametric":
-        include = st.multiselect('Choose which distribution(s) you want to fit to your data', ['Exponential Distribution',
-        'Normal Distribution', 'Beta Distribution', 'Gumbel Distribution' ,'Weibull Distribution', 'Lognormal Distribution',
-        'Gamma Distribution','Loglogistic Distribution'])
-        metric = st.radio('Choose a goodness of fit criteria', ('BIC', 'AICc', 'AD', 'Log-likelihood'))
-        method = st.radio('Choose the method to fit the distribution', ('MLE', 'LS', 'RRX', 'RRY'))
 
+        distr = distributions.distributions
+        fitdistr = distributions.fit_distributions
 
-        all_dist = ['Exponential Distribution',
-        'Normal Distribution', 'Beta Distribution', 'Gumbel Distribution' ,'Weibull Distribution', 'Lognormal Distribution',
-        'Gamma Distribution','Loglogistic Distribution']
+        include = st.multiselect('Choose which distribution(s) you want to \
+                                 fit your data to:', list(distr))
 
-        exclude = list(set(all_dist)-set(include))
+        metric, method = functions.fit_options()
+
+        plot_params = functions.plot_parameters(CI=True, IC_plot=['CDF', 'SF'])
+
+        exclude = list(set(list(distr))-set(include))
 
         exc = []
         for dis in exclude:
-            if dis == 'Exponential Distribution':
-                exc.extend(['Exponential_2P', 'Exponential_1P'])
-            if dis == 'Normal Distribution':
-                exc.append('Normal_2P')
-            if dis == 'Beta Distribution':
-                exc.append('Beta_2P')
-            if dis == 'Gumbel Distribution':
-                exc.append('Gumbel_2P')
-            if dis == 'Weibull Distribution':
-                exc.extend(['Weibull_2P', 'Weibull_3P'])
-            if dis == 'Lognormal Distribution':
-                exc.extend(['Lognormal_2P', 'Lognormal_3P'])
-            if dis == 'Gamma Distribution':
-                exc.extend(['Gamma_2P', 'Gamma_3P'])
-            if dis == 'Loglogistic Distribution':
-                exc.extend(['Loglogistic_2P', 'Loglogistic_3P'])
+            for fitdis in fitdistr:
+                if fitdis[:4] in dis:
+                    exc.append(fitdis)
 
-        expander = st.expander("Plot parameter")
-        points_quality = expander.number_input('Number of points to plot:', min_value=5, value = 5000, max_value = 100000 )
-        show_mean = expander.checkbox("Show distribution mean.", value=True, key=None)
-        show_median = expander.checkbox("Show distribution median.", value=True, key=None)
-        show_mode = expander.checkbox("Show distribution mode.", value=True, key=None)
-        axis_format = expander.checkbox("Show axis values in 0.00e+0 form.", value=False, key=None)
     elif mod == "Non-parametric":
-        include = st.selectbox('Choose which distribution you want to fit to your data', ['Kaplan-Meier', 'Nelson-Aalen', 'Rank Adjustment'])
-        ci = st.number_input('CI', min_value=0., max_value=1., value=0.95)
-        par = st.checkbox('Do you want to compare the results with the fit to a parametric distribution?')
+
+        distr = distributions.non_parametric_distributions
+
+        col1, col2 = st.columns([1,1])
+
+        include = col1.selectbox('Choose which distribution you want to \
+                                 fit your data to:', list(distr))
+
+        ci = col2.number_input('Confidence Interval:',
+                               min_value=0.0, max_value=1.0, value=0.95)
+
+        par = st.checkbox('Do you want to compare the results with \
+                          a parametric distribution?')
+
         if par == True:
-            metric = st.radio('Choose a goodness of fit criteria', ('BIC', 'AICc', 'AD', 'Log-likelihood'))
-            method = st.radio('Choose the method to fit the distribution', ('MLE', 'LS', 'RRX', 'RRY'))
-        expander = st.expander("Plot parameter")
-        points_quality = expander.number_input('Number of points to plot', min_value=5, value=5000, max_value=100000)
-    st.write(" ")
+            metric, method = functions.fit_options()
+
+        plot_params = functions.plot_parameters(n_points=False, stats=False,
+                                                IC_plot=['CDF', 'SF', 'CHF'],
+                                                np=True)
 
     if st.button("Fit distribution"):
 
+        if not uploaded_file:
+            st.error('Please upload a file first!')
+            st.stop()
+
         if mod == 'Parametric':
 
-            if not exc:
-                exc = None
-            elif len(exc) == 13:
+            if not include:
                 st.error('Please, choose at least one distribution to fit.')
                 st.stop()
 
-            results = Fit_Everything(failures=fdata, right_censored=cdata, exclude=exc, sort_by=metric, print_results=False,\
-                show_histogram_plot=False, show_PP_plot=False, show_probability_plot=False, method=method)
+            exc = exc if exc else None
 
-            st.write('## Results of all fitted distributions')
-            results.results = results.results.applymap(str)
-            st.write(results.results)
+            results = Fit_Everything(failures=fdata,
+                                     right_censored=cdata,
+                                     exclude=exc,
+                                     sort_by=metric, method=method,
+                                     print_results=False,
+                                     show_histogram_plot=False,
+                                     show_PP_plot=False,
+                                     show_probability_plot=False)
 
-            st.write('## Results of the best fitted distribution')
+            st.write('### Results of all fitted distributions')
+            results_table = results.results.set_index('Distribution')
+            results_table = results_table.mask(results_table=='').astype(float)
+            results_table = results_table.fillna('')
+            for i in range(len(results_table.iloc[:,0])):
+                for j in range(len(results_table.iloc[0,:])):
+                    try:
+                        results_table.iloc[i,j] = f'{results_table.iloc[i,j]:.{plot_params["decimals"]}f}'
+                    except ValueError:
+                        results_table.iloc[i,j] = ''
+            st.dataframe(results_table, use_container_width=True)
+
+            st.write('### Results of the best fitted distribution')
             dist = results.best_distribution
             distribution_name = results.best_distribution_name
 
-            percentiles = np.linspace(1, 99, num=99)						
-            IC = 0.9
+            percentiles = np.linspace(1, 99, num=99)
 
-            if distribution_name == 'Exponential_1P':
-                new_fit = Fit_Exponential_1P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Exponential_Distribution(Lambda=new_fit.Lambda_upper)
-                fit_lw = Exponential_Distribution(Lambda=new_fit.Lambda_lower)
-            elif distribution_name == 'Exponential_2P':
-                new_fit = Fit_Exponential_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Exponential_Distribution(Lambda=new_fit.Lambda_upper, gamma=new_fit.gamma_upper)
-                fit_lw = Exponential_Distribution(Lambda=new_fit.Lambda_lower, gamma=new_fit.gamma_lower)
-            elif distribution_name == 'Normal_2P':
-                new_fit = Fit_Normal_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Normal_Distribution(mu=new_fit.mu_upper, sigma=new_fit.sigma_lower)
-                fit_lw = Normal_Distribution(mu=new_fit.mu_lower, sigma=new_fit.sigma_lower)
-            elif distribution_name == 'Beta_2P':
-                new_fit = Fit_Beta_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Beta_Distribution(alpha=new_fit.alpha_upper, beta=new_fit.beta_upper)
-                fit_lw = Beta_Distribution(alpha=new_fit.alpha_lower, beta=new_fit.beta_lower)
-            elif distribution_name == 'Gumbel_2P':
-                new_fit = Fit_Gumbel_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Gumbel_Distribution(mu=new_fit.mu_upper, sigma=new_fit.sigma_upper)
-                fit_lw = Gumbel_Distribution(mu=new_fit.mu_lower, sigma=new_fit.sigma_lower)
-            elif distribution_name == 'Weibull_2P':
-                new_fit = Fit_Weibull_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Weibull_Distribution(alpha=new_fit.alpha_upper, beta=new_fit.beta_upper)
-                fit_lw = Weibull_Distribution(alpha=new_fit.alpha_lower, beta=new_fit.beta_lower)
-            elif distribution_name == 'Weibull_3P':
-                new_fit = Fit_Weibull_3P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Weibull_Distribution(alpha=new_fit.alpha_upper, beta=new_fit.beta_upper, gamma=new_fit.gamma_upper)
-                fit_lw = Weibull_Distribution(alpha=new_fit.alpha_lower, beta=new_fit.beta_lower, gamma=new_fit.gamma_lower)
-            elif distribution_name == 'Lognormal_2P':
-                new_fit = Fit_Lognormal_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Lognormal_Distribution(mu=new_fit.mu_upper, sigma=new_fit.sigma_upper)
-                fit_lw = Lognormal_Distribution(mu=new_fit.mu_lower, sigma=new_fit.sigma_lower)
-            elif distribution_name == 'Lognormal_3P':
-                new_fit = Fit_Lognormal_3P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Lognormal_Distribution(mu=new_fit.mu_upper, sigma=new_fit.sigma_upper, gamma=new_fit.gamma_upper)
-                fit_lw = Lognormal_Distribution(mu=new_fit.mu_lower, sigma=new_fit.sigma_lower, gamma=new_fit.gamma_lower)
-            elif distribution_name == 'Gamma_2P':
-                new_fit = Fit_Gamma_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Gamma_Distribution(alpha=new_fit.alpha_upper, beta=new_fit.beta_upper)
-                fit_lw = Gamma_Distribution(alpha=new_fit.alpha_lower, beta=new_fit.beta_lower)
-            elif distribution_name == 'Gamma_3P':
-                new_fit = Fit_Gamma_3P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Gamma_Distribution(alpha=new_fit.alpha_upper, beta=new_fit.beta_upper, gamma=new_fit.gamma_upper)
-                fit_lw = Gamma_Distribution(alpha=new_fit.alpha_lower, beta=new_fit.beta_lower, gamma=new_fit.gamma_lower)
-            elif distribution_name == 'Loglogistic_2P':
-                new_fit = Fit_Loglogistic_2P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Loglogistic_Distribution(alpha=new_fit.alpha_upper, beta=new_fit.beta_upper)
-                fit_lw = Loglogistic_Distribution(alpha=new_fit.alpha_lower, beta=new_fit.beta_lower)
-            elif distribution_name == 'Loglogistic_3P':
-                new_fit = Fit_Loglogistic_3P(failures=fdata, right_censored=cdata, show_probability_plot=False,print_results=False, percentiles=percentiles, CI=IC, method=method)
-                fit_up = Loglogistic_Distribution(alpha=new_fit.alpha_upper, beta=new_fit.beta_upper, gamma=new_fit.gamma_upper)
-                fit_lw = Loglogistic_Distribution(alpha=new_fit.alpha_lower, beta=new_fit.beta_lower, gamma=new_fit.gamma_lower)
+            new_fit = fitdistr[distribution_name][0](
+                failures=fdata, right_censored=cdata,
+                show_probability_plot=False, print_results=False,
+                percentiles=percentiles, method=method,
+                CI=plot_params['confidence_interval']
+            )
 
-            if distribution_name =="Beta_2P":
-                properties_dist = {
-                'Mean': dist.mean, 
-                'Median': dist.median,
-                'Mode':  'No mode exists unless Alpha and Beta are greater than 1.',
-                'Variance': dist.variance,
-                'Standard Deviation': dist.standard_deviation,
-                'Skewness': dist.skewness, 
-                'Kurtosis': dist.kurtosis,
-                'Excess Kurtosis': dist.excess_kurtosis 
-                }
-            else:
-                properties_dist = {
-                'Mean': dist.mean, 
-                'Median': dist.median,
-                'Mode':  dist.mode,
-                'Variance': dist.variance,
-                'Standard Deviation': dist.standard_deviation,
-                'Skewness': dist.skewness, 
-                'Kurtosis': dist.kurtosis,
-                'Excess Kurtosis': dist.excess_kurtosis 
-                }
+            if 'Exponential' in distribution_name:
+                new_fit.results = new_fit.results.drop(1, axis=0)
 
-            df = pd.DataFrame.from_dict(properties_dist, orient='index', columns=['Valor'])
-            st.dataframe(df)
+            new_fit.results = new_fit.results.set_index('Parameter')
 
-            upper_est = new_fit.percentiles['Upper Estimate'].values
-            lower_est = new_fit.percentiles['Lower Estimate'].values
-            y_teste = np.linspace(0.99,0.01, num=99)
-        
-            dist.PDF()    
-            x_min,x_max = plt.gca().get_xlim()
-            x = np.linspace(x_min,x_max,points_quality)
-            y_PDF = dist.PDF(xvals=x)
-            y_CDF = dist.CDF(xvals=x)
-            y_SF = dist.SF(xvals=x)
-            y_HF = dist.HF(xvals=x)
-            y_HF_up = fit_up.HF(xvals=x)
-            y_HF_lw = fit_lw.HF(xvals=x)
-            y_CHF = dist.CHF(xvals=x)
-            x_f, y_f = plotting_positions(failures=fdata, right_censored=cdata)
-            fig = go.Figure()
-            fig.add_trace(go.Histogram(x=fdata, histnorm='probability density', name = 'Dados originais (falha)', marker=dict(color = colors[0]), opacity=0.3))
-            fig.add_trace(go.Scatter(x=x, y=y_PDF, mode='lines', name = 'PDF',  marker=dict(color = colors[0]), visible = True))
-            
-            fig.add_trace(go.Scatter(x=x_f, y=y_f, mode='markers', name = 'Failure data',  marker=dict(color = colors[1]), visible = 'legendonly'))
-            fig.add_trace(go.Scatter(x=x, y=y_CDF, mode='lines', name = 'CDF',  marker=dict(color = colors[1]), visible = 'legendonly'))
-            
-            fig.add_trace(go.Scatter(x=upper_est, y=y_teste[0:len(upper_est)+1], mode='lines',  marker=dict(color = colors[2]), visible = 'legendonly', line=dict(width=0), name= 'SF upper'))
-            fig.add_trace(go.Scatter(x=lower_est, y=y_teste[0:len(lower_est)+1], mode='lines',  marker=dict(color = colors[2]), visible = 'legendonly', fill='tonexty', line=dict(width=0), name= 'SF lower'))
-            fig.add_trace(go.Scatter(x=x, y=y_SF, mode='lines', name = 'SF',  marker=dict(color = colors[2]), visible = 'legendonly'))
-        
-            fig.add_trace(go.Scatter(x=x, y=y_HF, mode='lines', name = 'HF',  marker=dict(color = colors[3]), visible = 'legendonly'))
-            fig.add_trace(go.Scatter(x=x, y=y_CHF, mode='lines', name = 'CHF',  marker=dict(color = colors[4]), visible = 'legendonly'))
-            
-            
+            params_upper = list(new_fit.results.iloc[:,3])
+            params_lower = list(new_fit.results.iloc[:,2])
+            fit_up = fitdistr[distribution_name][1]['distribution'](
+                *params_upper
+            )
+            fit_lw = fitdistr[distribution_name][1]['distribution'](
+                *params_lower
+            )
 
-            if show_mean:
-                fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
-            if show_median:
-                fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
-            if show_mode:
-                fig.add_vline(x=dist.mode, line_dash="dash", annotation_text="Mode", annotation_position="top right")
-            if axis_format:
-                tick_format = '0.2e'
-            else:
-                tick_format = '0.2f'
-            fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat=tick_format), xaxis=dict(tickformat=tick_format), updatemenus=updatemenus_log,title_text='Parametric Model - {} ({}) '.format(distribution_name,dist.param_title)) #size of figure
-            fig.update_xaxes(title = 'Time')
-            fig.update_yaxes(title = 'Probability density')			
-            st.plotly_chart(fig)
+            functions.plot_distribution(dist, plot_params,
+                                        title='Evaluated data',
+                                        sidetable=new_fit.results,
+                                        plot_dists_up_lw=plot_params['up_lw'],
+                                        dist_upper=fit_up,
+                                        dist_lower=fit_lw,
+                                        failure_data=fdata,
+                                        censored_data=cdata)
 
+        elif mod == "Non-parametric":
 
-        else:
-            if include == 'Kaplan-Meier':
-                dist = KaplanMeier(failures=fdata, right_censored=cdata, show_plot=False, print_results=False, CI=ci)
-            elif include == 'Nelson-Aalen':
-                dist = NelsonAalen(failures=fdata, right_censored=cdata, show_plot=False, print_results=False, CI=ci)   
-            elif include == 'Rank Adjustment':
-                dist = RankAdjustment(failures=fdata, right_censored=cdata, show_plot=False, print_results=False, CI=ci)
+            dist = distr[include](failures=fdata, right_censored=cdata, CI=ci,
+                                  show_plot=False, print_results=False)
 
-            # x_min,x_max = plt.gca().get_xlim()
-            # x = np.linspace(x_min,x_max,points_quality)
-            x = dist.xvals
-
-            y_CDF = dist.CDF
-            y_CDF_up = dist.CDF_upper
-            y_CDF_lw = dist.CDF_lower
-            y_SF = dist.SF
-            y_SF_up = dist.SF_upper
-            y_SF_lw = dist.SF_lower
-            y_CHF = dist.CHF
-            y_CHF_up = dist.CHF_upper
-            y_CHF_lw = dist.CHF_lower
-
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=x, y=y_CDF_up, mode='lines',  marker=dict(color = colors[0]), visible = True, showlegend=False, line=dict(width=0)))
-            fig.add_trace(go.Scatter(x=x, y=y_CDF_lw, mode='lines',  marker=dict(color = colors[0]), visible = True, showlegend=False, fill='tonexty', line=dict(width=0)))
-            fig.add_trace(go.Scatter(x=x, y=y_CDF, mode='lines', name = 'CDF',  marker=dict(color = colors[0]), visible = True))
-            
-
-            fig.add_trace(go.Scatter(x=x, y=y_SF_up, mode='lines',  marker=dict(color = colors[1]), visible = True, showlegend=False, line=dict(width=0)))
-            fig.add_trace(go.Scatter(x=x, y=y_SF_lw, mode='lines',  marker=dict(color = colors[1]), visible = True, fill='tonexty', showlegend=False, line=dict(width=0)))
-            fig.add_trace(go.Scatter(x=x, y=y_SF, mode='lines', name = 'SF',  marker=dict(color = colors[1]), visible = True))
-            
-
-            fig.add_trace(go.Scatter(x=x, y=y_CHF_up, mode='lines',  marker=dict(color = colors[2]), visible = True, showlegend=False, line=dict(width=0)))
-            fig.add_trace(go.Scatter(x=x, y=y_CHF_lw, mode='lines',  marker=dict(color = colors[2]), visible = True, fill='tonexty', showlegend=False, line=dict(width=0)))   
-            fig.add_trace(go.Scatter(x=x, y=y_CHF, mode='lines', name = 'CHF',  marker=dict(color = colors[2]), visible = True))
-                
-            
-            #Parametric
+            #Parametric comparison
             if par == True:
-                results = Fit_Everything(failures=fdata, right_censored=cdata, sort_by=metric, print_results=False,\
-                show_histogram_plot=False, show_PP_plot=False, show_probability_plot=False, method=method)
-                y_SF_par = results.best_distribution.SF(xvals=x)
-                y_CDF_par = results.best_distribution.CDF(xvals=x)
-                y_CHF_par = results.best_distribution.CHF(xvals=x)
-                fig.add_trace(go.Scatter(x=x, y=y_CDF_par, mode='lines', name = 'CDF parametric - {}'.format(results.best_distribution_name),  marker=dict(color = colors[0]), visible = True, line=dict(dash='dot')))
-                fig.add_trace(go.Scatter(x=x, y=y_SF_par, mode='lines', name = 'SF parametric - {}'.format(results.best_distribution_name),  marker=dict(color = colors[1]), visible = True, line=dict(dash='dot')))
-                fig.add_trace(go.Scatter(x=x, y=y_CHF_par, mode='lines', name = 'CHF parametric - {}'.format(results.best_distribution_name),  marker=dict(color = colors[2]), visible = True, line=dict(dash='dot'))) 
+                results = Fit_Everything(failures=fdata,
+                                         right_censored=cdata,
+                                         sort_by=metric, method=method,
+                                         print_results=False,
+                                         show_histogram_plot=False,
+                                         show_PP_plot=False,
+                                         show_probability_plot=False)
+                par_params = [results]
+            else:
+                par_params = None
 
-
-            fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat=tick_format), xaxis=dict(tickformat=tick_format), updatemenus=updatemenus_log,title_text='Non-parametric Model - {}'.format(include)) #size of figure
-            fig.update_xaxes(title = 'Time')
-            fig.update_yaxes(title = 'Probability density')			
-            st.plotly_chart(fig)
+            functions.plot_distribution(dist, plot_params,
+                                        title='Evaluated data',
+                                        plot_dists=['CDF', 'SF', 'CHF'],
+                                        plot_dists_up_lw=plot_params['up_lw'],
+                                        non_parametric=True, par=par_params,
+                                        failure_data=fdata,
+                                        censored_data=cdata)

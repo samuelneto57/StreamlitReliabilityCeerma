@@ -1,271 +1,110 @@
 import streamlit as st
-import reliability 
-import plotly.express as px
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-import numpy as np
-from reliability.Distributions import Weibull_Distribution, Lognormal_Distribution, Exponential_Distribution, Normal_Distribution, Gamma_Distribution, Beta_Distribution, Loglogistic_Distribution, Gumbel_Distribution, Mixture_Model, Competing_Risks_Model
-#st.set_page_config(page_title="Parametric Model",page_icon="📈",layout="wide", initial_sidebar_state="expanded")
+from reliability.Distributions import Mixture_Model, Competing_Risks_Model
+
+import distributions
+import functions
+
+
 def show():
-    #st.set_page_config(page_title="Parametric Model",page_icon="📈",layout="wide", initial_sidebar_state="expanded")
+    st.write("""
+    In this module, you can combine two or more parametric distributions.
+    """)
 
-    hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    #ReportStatus {visibility: hidden;}
-
-    </style>
-
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
-    #href_homepage = f'<a href="https://reliability.ceerma.com/" style="text-decoration: none; color :black;" > <button kind="primary" class="css-qbe2hs edgvbvh1">Go to Homepage</button></a>'
-    #st.markdown(href_homepage, unsafe_allow_html=True)
-
-    updatemenus_log = [
-        dict(
-            buttons=list([
-                dict(
-                    args=[{'xaxis.type': '-', 'yaxis.type': '-'}],
-                    label='Linear',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': 'log', 'yaxis.type': '-'}],
-                    label='Log-x',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': '-', 'yaxis.type': 'log'}],
-                    label='Log-y',
-                    method='relayout'
-
-                ),
-                dict(
-                    args=[{'xaxis.type': 'log', 'yaxis.type': 'log'}],
-                    label='Log-xy',
-                    method='relayout'
-
-                ),
-            ]),
-            direction="right",
-            type="buttons",
-            pad={"r": 10, "t": 10},
-            x=0.0,
-            xanchor="left",
-            y=1.115,
-            yanchor="top"                       
-
-        )
-    ]
-
-
-
-
-    st.title("Mixture models & Competing risks Model")
-    ## Select Model
-    Model_selected = st.selectbox( 'Select Model.', ('Mixture Model', 'Competing Risk model'))
-    if Model_selected == 'Mixture Model':
+    with st.expander('Short guide'):
         st.write("""
-        Mixture models are a combination of two or more distributions 
-        added together to create a distribution that has a shape with 
-        more flexibility than a single distribution. Each of the 
-        mixture’s components must be multiplied by a proportion, and the 
-        sum of all the proportions is equal to 1.
-        """)
-    if Model_selected == 'Competing Risk model':
-        st.write("""
-        Competing risks models are a combination of two or more 
-        distributions that represent failure modes which are “competing” 
-        to end the life of the system being modelled. This model is 
-        similar to a mixture model in the sense that it uses multiple 
-        distributions to create a new model that has a shape with more 
-        flexibility than a single distribution. However, unlike in 
-        mixture models, we are not adding proportions of the PDF or CDF, 
-        but are instead multiplying the reliability (survival) functions.
+        Mixture models are a combination of two or more distributions by 
+        multiplying each of the combining distributions' PDFs (and, 
+        equivalently, CDFs) by a proportion, and the sum of all the proportions 
+        must be equal to 1. In simple terms, its a weighted sum of 
+        distributions' PDFs (and CDFs). If all the proportions do not 
+        sum to 1, each weight is divided by the sum to normalize them.
+
+        Competing risks models are a combination of two or more distributions 
+        by multiplying the SFs (survival, or reliability, functions). This is 
+        similar to Mixture models, but the components here are instead 
+        "competing" to the end of the life of the system being modelled.
+
+        In both cases, those models are useful when there is more than one 
+        failure mode that is generating the failure data. This can be 
+        recognised by the shape of the PDF, CDF and/or SF being outside of what 
+        any single distribution can accurately model. You should not use them 
+        just because it can fit almost anything really well, but instead if you 
+        suspect that there are multiple failure modes contributing to the 
+        failure data you are observing. To judge whether a mixture model is 
+        justified, look at the goodness of fit criterion (AICc or BIC) which 
+        penalises the score based on the number of parameters in the model. The 
+        closer the goodness of fit criterion is to zero, the better the fit. 
+        Using AD or log-likelihood for this check is not appropriate as these 
+        goodness of fit criterions do not penalise the score based on the 
+        number of parameters in the model and are therefore prone to 
+        overfitting.
         """)
 
+    col1, col2 = st.columns([1,1])
 
+    Model_selected = col1.selectbox('Select method:', 
+                                    ('Mixture Model', 'Competing Risk Model'))
 
-    number_distribution = st.number_input("N° of distributions:", min_value=1, max_value= 20)
-    st.write(" ")
-    init_val= 1/number_distribution
+    number_distributions = col2.number_input("N° of distributions:", value=1,
+                                             min_value=1, max_value=20)
+    number_distributions =  int(number_distributions)
 
-    number_distribution =  int(number_distribution)
+    init_val= 1/number_distributions
+
+    distr = distributions.distributions
+    
+    selected_weights = []
+    selected_dists = []
+
+    for i in range(number_distributions):
+        if Model_selected == 'Mixture Model':
+            cols = st.columns([2,1,1,1,1])
+        else:
+            cols = st.columns([3,1,1,1])
+        distribution_name = cols[0].selectbox('Select distribution:', 
+                                                list(distr),
+                                                key=f"dist_{i}")
+        
+        var = []
+        variables = distr[distribution_name]['variables']
+        for j, variable in enumerate(variables):
+            item = variables[variable]
+            to_append = cols[j+1].number_input(variable[-1], 
+                                                value=item[0], 
+                                                min_value=item[1],
+                                                step=0.1,
+                                                format='%0.2f',
+                                                key=f'var_{j}_{i}')
+            var.append(to_append)
+
+        if Model_selected == 'Mixture Model':
+            selected_weights.append(cols[4].number_input("Proportion", 
+                                                         value=init_val, 
+                                                         min_value=0.0, 
+                                                         max_value=1.0,
+                                                         key=f'weigth_{i}'))
+        
+        selected_dists.append(distr[distribution_name]['distribution'](*var))
+    
     if Model_selected == 'Mixture Model':
+        # Fix rounding problems by normalizing weights
+        total = 0.0
+        if number_distributions > 1:
+            sum_weights = sum(selected_weights)
+            for i in range(1, len(selected_weights)):
+                new = selected_weights[i] / sum_weights
+                selected_weights[i] = new
+                total = total + new
+        selected_weights[0] = 1 - total
 
-        list_distribution=[]
-        var1_list=[]
-        var2_list=[]
-        var3_list=[]
-        weight_list=[]
-        dist_fun_list=[]
-        col1, col2, col3, col4, col5 = st.columns([3, 1,1,1,2])
-
-        for i in range(number_distribution):
-            list_distribution.append(col1.selectbox( 'Select the distribution.', ('Exponential Distribution',
-            'Normal Distribution', 'Gumbel Distribution' ,'Weibull Distribution', 'Lognormal Distribution',
-            'Gamma Distribution','Loglogistic Distribution') , key = str(i) + "_dist" ) )
-            if list_distribution[i] == "Exponential Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Lambda)" , min_value= float(np.finfo(float).eps), value=10.0 , key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Displacement parameter (Gamma)" , key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0) ) ) 
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Exponential_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i] == "Normal Distribution":
-                var1_list.append( col2.number_input("Location parameter (Mu)" ) )
-                var2_list.append( col3.number_input("Scale parameter (Sigma)", min_value= float(np.finfo(float).eps), value=1.0) )
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0) ) ) 
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Normal_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i]=="Beta Distribution": 
-                var1_list.append( col2.number_input("Shape parameter (Alpha)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Shape parameter (Beta)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2")) 
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0) ) ) 
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Beta_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i] =="Gumbel Distribution":
-                var1_list.append( col2.number_input("Location parameter (Mu)" , key = str(i)+"_var1")) 
-                var2_list.append( col3.number_input("Scale parameter (Sigma)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2")) 
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0)) ) 
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Gumbel_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i] =="Weibull Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Alpha)" , min_value=  float(np.finfo(float).eps), value=10.0, key = str(i)+"_var1" ))
-                var2_list.append( col3.number_input("Shape parameter (Beta)" , min_value=  float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Location parameter (Gamma)", key = str(i)+"_var3" ) )
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Weibull_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-            elif list_distribution[i] =="Lognormal Distribution":
-                var1_list.append( col2.number_input("Location parameter (Mu)" , key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Scale parameter (Sigma)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2" ) )
-                var3_list.append( col4.number_input("Location parameter (Gamma)", key = str(i)+"_var3" ) )
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Lognormal_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-            elif list_distribution[i]  =="Gamma Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Alpha)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Shape parameter (Beta)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Location parameter (Gamma)", key = str(i)+"_var3" ) )
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Gamma_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-            elif list_distribution[i] =="Loglogistic Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Alpha)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Shape parameter (Beta)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Location parameter (Gamma)" , key = str(i)+"_var3") )
-                weight_list.append( col5.number_input("Proportions" , min_value= float(0) , max_value= float(1), value=init_val , key = str(i)+"_weight") )
-                dist_fun_list.append(Loglogistic_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-
-    if Model_selected == 'Competing Risk model':
-
-        list_distribution=[]
-        var1_list=[]
-        var2_list=[]
-        var3_list=[]
-        dist_fun_list=[]
-        col1, col2, col3, col4 = st.columns([3, 1,1,1])
-
-        for i in range(number_distribution):
-            list_distribution.append(col1.selectbox( 'Select the distribution.', ('Exponential Distribution',
-            'Normal Distribution', 'Gumbel Distribution' ,'Weibull Distribution', 'Lognormal Distribution',
-            'Gamma Distribution','Loglogistic Distribution') , key = str(i) + "_dist" ) )
-            if list_distribution[i] == "Exponential Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Lambda)" , min_value= float(np.finfo(float).eps), value=10.0 , key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Displacement parameter (Gamma)" , key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0) ) ) 
-                dist_fun_list.append(Exponential_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i] == "Normal Distribution":
-                var1_list.append( col2.number_input("Location parameter (Mu)" ) )
-                var2_list.append( col3.number_input("Scale parameter (Sigma)", min_value= float(np.finfo(float).eps), value=1.0) )
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0) ) ) 
-                dist_fun_list.append(Normal_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i]=="Beta Distribution": 
-                var1_list.append( col2.number_input("Shape parameter (Alpha)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Shape parameter (Beta)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2")) 
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0) ) ) 
-                dist_fun_list.append(Beta_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i] =="Gumbel Distribution":
-                var1_list.append( col2.number_input("Location parameter (Mu)" , key = str(i)+"_var1")) 
-                var2_list.append( col3.number_input("Scale parameter (Sigma)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2")) 
-                var3_list.append( col4.number_input("Not Parameter" , key = str(i)+"_var3" , min_value= float(0) , max_value= float(0) ,step=float(0)) ) 
-                dist_fun_list.append(Gumbel_Distribution(var1_list[i],var2_list[i]))
-            elif list_distribution[i] =="Weibull Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Alpha)" , min_value=  float(np.finfo(float).eps), value=10.0, key = str(i)+"_var1" ))
-                var2_list.append( col3.number_input("Shape parameter (Beta)" , min_value=  float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Location parameter (Gamma)", key = str(i)+"_var3" ) )
-                dist_fun_list.append(Weibull_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-            elif list_distribution[i] =="Lognormal Distribution":
-                var1_list.append( col2.number_input("Location parameter (Mu)" , key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Scale parameter (Sigma)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2" ) )
-                var3_list.append( col4.number_input("Location parameter (Gamma)", key = str(i)+"_var3" ) )
-                dist_fun_list.append(Lognormal_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-            elif list_distribution[i]  =="Gamma Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Alpha)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Shape parameter (Beta)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Location parameter (Gamma)", key = str(i)+"_var3" ) )
-                dist_fun_list.append(Gamma_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-            elif list_distribution[i] =="Loglogistic Distribution":
-                var1_list.append( col2.number_input("Scale parameter (Alpha)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var1") )
-                var2_list.append( col3.number_input("Shape parameter (Beta)", min_value= float(np.finfo(float).eps), value=1.0, key = str(i)+"_var2") )
-                var3_list.append( col4.number_input("Location parameter (Gamma)" , key = str(i)+"_var3") )
-                dist_fun_list.append(Loglogistic_Distribution(var1_list[i],var2_list[i],var3_list[i]))
-
-
-    expander = st.expander("Plot parameter")
-    points_quality = expander.number_input('Number of points to plot:', min_value=5, value = 5000, max_value = 100000 )
-    show_mean = expander.checkbox("Show distribution mean.", value=True, key=None)
-    show_median = expander.checkbox("Show distribution median.", value=True, key=None)
-    show_mode = expander.checkbox("Show distribution mode.", value=True, key=None)
-    axis_format = expander.checkbox("Show axis values in 0.00e+0 form.", value=False, key=None)
-    st.write(" ")
+    plot_params = functions.plot_parameters()
 
     if st.button("Plot distribution"):
             
-        if Model_selected == 'Mixture Model':    
-            dist = Mixture_Model(distributions=dist_fun_list, proportions=weight_list)
-        if Model_selected == 'Competing Risk model':
-            dist = Competing_Risks_Model(distributions=dist_fun_list)
+        if Model_selected == 'Mixture Model':
+            dist = Mixture_Model(distributions=selected_dists, 
+                                 proportions=selected_weights)
+        if Model_selected == 'Competing Risk Model':
+            dist = Competing_Risks_Model(distributions=selected_dists)
         
-        
-        properties_dist = st.empty()
-
-        properties_dist.text("""
-        Mean: {}
-        Median: {}
-        Mode:  {}
-        Variance: {}
-        Standard Deviation: {}
-        Skewness: {} 
-        Kurtosis: {}
-        Excess Kurtosis: {} 
-        """.format(dist.mean,dist.median ,dist.mode, dist.variance, dist.standard_deviation, dist.skewness, dist.kurtosis, dist.excess_kurtosis ) )
-
-        dist.PDF()    
-        x_min,x_max = plt.gca().get_xlim()
-        x = np.linspace(x_min,x_max,int(points_quality))
-        y_PDF = dist.PDF(xvals=x)
-        y_CDF = dist.CDF(xvals=x)
-        y_SF = dist.SF(xvals=x)
-        y_HF = dist.HF(xvals=x)
-        y_CHF = dist.CHF(xvals=x)
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x, y=y_PDF, mode='lines', name = 'PDF',  marker=dict(color = 'rgba(255, 223, 118, 0.9)'), visible = True))
-        fig.add_trace(go.Scatter(x=x, y=y_CDF, mode='lines', name = 'CDF',  marker=dict(color = 'rgba(255, 0, 0, 0.9)'), visible = 'legendonly'))
-        fig.add_trace(go.Scatter(x=x, y=y_SF, mode='lines', name = 'SF',  marker=dict(color = 'rgba(0, 255, 0, 0.9)'), visible = 'legendonly'))
-        fig.add_trace(go.Scatter(x=x, y=y_HF, mode='lines', name = 'HF',  marker=dict(color = 'rgba(0, 0, 255, 0.9)'), visible = 'legendonly'))
-        fig.add_trace(go.Scatter(x=x, y=y_CHF, mode='lines', name = 'CHF',  marker=dict(color = 'rgba(135, 45, 54, 0.9)'), visible = 'legendonly'))
-        if show_mean:
-            fig.add_vline(x=dist.mean, line_dash="dash", annotation_text="Mean", annotation_position="top right")
-        if show_median:
-            fig.add_vline(x=dist.median, line_dash="dash", annotation_text="Median", annotation_position="top right")
-        if show_mode:
-            fig.add_vline(x=dist.mode, line_dash="dash", annotation_text="Mode", annotation_position="top right")
-        if axis_format:
-            tick_format = '0.2e'
-        else:
-            tick_format = '0.2f'
-        fig.update_layout(width = 1900, height = 600, title = 'Dados analisados', yaxis=dict(tickformat=tick_format), xaxis=dict(tickformat=tick_format), updatemenus=updatemenus_log,title_text=' {}  '.format(Model_selected)) #size of figure
-        fig.update_xaxes(title = 'Time')
-        fig.update_yaxes(title = 'Probability density')			
-        st.plotly_chart(fig)
+        functions.plot_distribution(dist, plot_params, title='Combined model')
