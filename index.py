@@ -3,7 +3,9 @@ from PIL import Image
 
 import functions
 import show_parametricmodel , show_parametricmix, show_otherfunc, \
-    show_repairable, show_alt, show_fitter
+    show_repairable, show_alt, show_fitter, show_rdt
+
+from __init__ import __version__
 
 
 image_ufpe = Image.open('./src/logo.png')
@@ -14,18 +16,22 @@ st.set_page_config(page_title="Reliability",
                    page_icon=image_ceerma,layout="wide",
                    initial_sidebar_state="expanded")
 
+version_info = f"Version {__version__}"
+st.sidebar.markdown(
+        f"""
+        <div style="display:table;margin-top:-32%;margin-left:0%;">{version_info}</div>
+        """,
+        unsafe_allow_html=True,
+)
+
 st.sidebar.image(image_ufpe)
-st.sidebar.write("")
 
 st.sidebar.title("📈 Reliability app")
-st.sidebar.write("")
-
 
 st.sidebar.write("""
 This app is an easy-to-use interface built in Streamlit for reliability
 related analysis and visualization using the Reliability Python library.
 """)
-st.sidebar.write("")
 
 submodules = {
     "Select a submodule": lambda: None,
@@ -43,6 +49,7 @@ modules = {
     "Repairable Systems": show_repairable.show,
     # "Other Functions"
     "Stress and Strength": show_otherfunc.show,
+    "RDT": show_rdt.show,
 }
 
 menu = st.sidebar.selectbox(" ", list(modules), label_visibility="collapsed")

@@ -226,7 +226,7 @@ alt_single_distributions = {
     'Exponential_Eyring': Fit_Exponential_Eyring,
     'Exponential_Power': Fit_Exponential_Power,
 }
-    
+
 
 alt_dual_distributions = {
     'Weibull_Dual_Exponential': Fit_Weibull_Dual_Exponential,
@@ -251,12 +251,17 @@ alt_substitution_equations = [
     r'\text{Lognormal } \mu = \ln\left(L(S)\right)',
 ]
 alt_single_equations = [
-    r'''\text{Exponential (or Arrhenius): } L(S)=b*\exp\left(\frac{a}{S}\right)''',
-    r"""\text{Eyring: } L(S)=\frac{1}{S}*\exp\left(-\left(c-\frac{a}{S}\right)\right)""",
-    r"""\text{Power (or Inverse Power Law): } L(S)=a*S^n""",
+    r'\text{Exponential (or Arrhenius): } L(S)=b*\exp\left(\frac{a}{S}\right)',
+    r'\text{Eyring: } L(S)=\frac{1}{S}*\exp\left(-\left(c-\frac{a}{S}\right)\right)',
+    r'\text{Power (or Inverse Power Law): } L(S)=a*S^n',
 ]
 alt_dual_equations = [
-    r"""\text{Dual-Exponential (or Temperature-Humidity): } L(S_1,S_2)=c*\exp\left(\frac{a}{S_1}+\frac{b}{S_2}\right)""",
-    r"""\text{Dual-Power: } L(S_1,S_2)=c*S_1^m*S_2^n""",
-    r"""\text{Power-Exponential (or Thermal-Nonthermal): } L(S_1,S_2)=c*\exp\left(\frac{a}{S_1}\right)*S_2^n""",
+    r'\text{Dual-Exponential (or Temperature-Humidity): } L(S_1,S_2)=c*\exp\left(\frac{a}{S_1}+\frac{b}{S_2}\right)',
+    r'\text{Dual-Power: } L(S_1,S_2)=c*S_1^m*S_2^n',
+    r'\text{Power-Exponential (or Thermal-Nonthermal): } L(S_1,S_2)=c*\exp\left(\frac{a}{S_1}\right)*S_2^n',
+]
+acceleration_factor_equations = [
+    r'\text{Arrhenius (or Exponential): } A_F = \exp\left({\frac{B}{S_{use}} - \frac{B}{S_{acc}}}\right)',
+    r'\text{Eyring: } A_F = \frac{S_{acc}}{S_{use}}\exp\left({\frac{B}{S_{use}} - \frac{B}{S_{acc}}}\right)',
+    r'\text{Inverse Power Law (or Power): } A_F = \left(\frac{S_{acc}}{S_{use}}\right)^B',
 ]
