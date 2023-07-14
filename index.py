@@ -19,7 +19,7 @@ st.set_page_config(page_title="Reliability",
 version_info = f"Version {__version__}"
 st.sidebar.markdown(
         f"""
-        <div style="display:table;margin-top:-32%;margin-left:0%;">{version_info}</div>
+        <div style="display:table;margin-top:-31%;margin-left:0%;">{version_info}</div>
         """,
         unsafe_allow_html=True,
 )

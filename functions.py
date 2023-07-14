@@ -25,7 +25,7 @@ def page_config(title=None, hide_menu=False):
     if title:
         element = element + f"""
         <div style="display:table;\
-            font-size:48px;font-weight:bold;margin-top:-7%;margin-left:0%;">
+            font-size:48px;font-weight:bold;margin-top:-6%;margin-left:0%;">
         {title}
         </div>
         """
