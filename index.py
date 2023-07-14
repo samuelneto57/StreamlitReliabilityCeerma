@@ -46,10 +46,10 @@ modules = {
     "Parametric Models": submodules,
     "Fit Distribution": show_fitter.show,
     "Accelerated Life Testing": show_alt.show,
+    "Reliability Demonstration Tests": show_rdt.show,
     "Repairable Systems": show_repairable.show,
     # "Other Functions"
     "Stress and Strength": show_otherfunc.show,
-    "RDT": show_rdt.show,
 }
 
 menu = st.sidebar.selectbox(" ", list(modules), label_visibility="collapsed")
