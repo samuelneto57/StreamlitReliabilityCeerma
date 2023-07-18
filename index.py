@@ -19,7 +19,7 @@ st.set_page_config(page_title="Reliability",
 version_info = f"Version {__version__}"
 st.sidebar.markdown(
         f"""
-        <div style="display:table;margin-top:-31%;margin-left:0%;">{version_info}</div>
+        <div style="display:table;margin-top:-80px">{version_info}</div>
         """,
         unsafe_allow_html=True,
 )
@@ -55,15 +55,16 @@ modules = {
 menu = st.sidebar.selectbox(" ", list(modules), label_visibility="collapsed")
 
 if menu == list(modules)[1]:
-    submenu = st.sidebar.selectbox(" ", list(modules[menu]), label_visibility="collapsed")
+    submenu = st.sidebar.selectbox(" ", list(modules[menu]),
+                                   label_visibility="collapsed")
     if submenu == "Select a submodule":
-        functions.page_config()
+        functions.page_config(reduce_whitespace=True)
     else:
-        functions.page_config(submenu)
+        functions.page_config(submenu, reduce_whitespace=True)
     modules[menu][submenu]()
 else:
     if menu == "Select a module":
-        functions.page_config()
+        functions.page_config(reduce_whitespace=True)
     else:
-        functions.page_config(menu)
+        functions.page_config(menu, reduce_whitespace=True)
     modules[menu]()

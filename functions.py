@@ -6,7 +6,7 @@ import numpy as np
 from reliability.Probability_plotting import plotting_positions
 
 
-def page_config(title=None, hide_menu=False):
+def page_config(title=None, hide_menu=False, reduce_whitespace=False):
     if hide_menu:
         element = """
         <style>
@@ -25,10 +25,23 @@ def page_config(title=None, hide_menu=False):
     if title:
         element = element + f"""
         <div style="display:table;\
-            font-size:48px;font-weight:bold;margin-top:-6%;margin-left:0%;">
+            font-size:48px;font-weight:bold;margin-top:-50px">
         {title}
         </div>
         """
+    if reduce_whitespace:
+        pass
+        # element = element + """
+        # <style>
+        #        .block-container {
+        #             padding-top: 0rem;
+        #             padding-bottom: 0rem;
+        #             padding-left: 3rem;
+        #             padding-right: 3rem;
+        #         }
+        # </style>
+        # """
+
     st.markdown(element, unsafe_allow_html=True)
 
 

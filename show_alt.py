@@ -13,7 +13,7 @@ def show():
     distributions in reliability.
     """)
 
-    with st.expander('Help'):
+    with st.expander('Short Guide'):
         st.write('When using this module, please take into consideration \
                  the following points:')
         st.info('- There is no need to sort the data in any particular \

@@ -1197,7 +1197,7 @@ def show():
     # mod = "Mean cumulative function (MCF)"
     if mod == 'Optimal replacement time':
         # replacement
-        with st.expander("Help"):
+        with st.expander("Short Guide"):
             st.write("""
             This function calculates the cost per unit time to determine how
             cost varies with replacement time. The cost model may be HPP
@@ -1240,7 +1240,7 @@ def show():
             q = 0
 
     if mod == "Mean cumulative function (MCF)":
-        with st.expander("Help"):
+        with st.expander("Short Guide"):
             st.write("""
             The Mean Cumulative Function (MCF) is a cumulative history
             function that shows the cumulative number of recurrences of an
@@ -1304,7 +1304,7 @@ def show():
 
     if mod == 'Reliability Growth':
         # Reliability growth
-        with st.expander("Help"):
+        with st.expander("Short Guide"):
 
             st.write("""
             Uses the Duane method to find the instantaneous MTBF and produce a
@@ -1353,7 +1353,7 @@ def show():
         mtbf = st.number_input(label='Target MTBF',min_value=0, format='%d')
     if mod == 'Rate of occurrence of failures (ROCOF)':
         # ROCOF
-        with st.expander("Help"):
+        with st.expander("Short Guide"):
             st.write("""
             Rate of occurrence of failures (ROCOF) is used to model the trend
             (constant, increasing, decreasing) in the failure interarrival
