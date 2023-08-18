@@ -7,7 +7,8 @@ from functools import partial
 import distributions
 
 
-help_text = 'Please use the same time measurement unit for all time entries'
+help_text = 'Please use the same time measurement \
+    unit for all time-related entries.'
 
 
 def combination(n, i):
@@ -76,6 +77,15 @@ def show():
         variables used in the model, no more than the allowed number of
         failures occur, then the target reliability is demonstrated.
 
+        Two possible approaches are considered, depending on which
+        variable is the most constrained in your scenario:
+        - 1) Test Time estimation, when Number of Specimens to be tested
+        is limited;
+        - 2) Number of Specimens to be tested estimation, when the
+        available Test Time is limited.
+        """)
+        st.write("")
+        st.write("""
         Under the RDT in this module, it is possible to consider an
         accelerated testing scenario, in which the Stress Level of the
         test is higher than the Use-level Stress. This way, failures are
@@ -86,6 +96,15 @@ def show():
         method and considering a Weibull distribution for the data.
         You could validade if your data comes from a Weibull
         distribution using the Fit Distribution module of this APP.
+        """)
+        st.info("""
+        In order to ensure that the estimation's confidence is
+        guaranteed, it is suggested that the Weibull's Shape parameter
+        you fill in is underestimated for approach 1 (e.g. Shape = 1),
+        or overestimated for approach 2 (e.g. Shape = 10). This ensures
+        that your Test Time or Number of Specimens estimations are
+        higher and, thus, the confidence of your Reliability
+        Demonstration Test is ensured.
         """)
 
     with st.expander("Acceleration Factor Information"):
@@ -100,24 +119,26 @@ def show():
 
     cols = st.columns([1,1])
 
-    options = ('Test Time (under accelerated condition)',
+    options = ('Test Time',
                'Number of Specimens to be tested')
 
     approach = cols[0].radio('Which test variable you want to estimate?',
                              options)
 
     if approach == options[0]:
-        n_test = cols[1].number_input('Fixed number of specimens to be tested',
+        n_test = cols[1].number_input(f'Fixed {options[1]}',
                                       min_value=0, value=1, step=1)
         params['n_units'] = n_test
     elif approach == options[1]:
-        t_test = cols[1].number_input('Fixed accelerated test time',
+        t_test = cols[1].number_input(f'Fixed {options[0]}',
                                       min_value=0.1, value=1.0,
                                       step=1.0, format='%0.2f',
                                       help=help_text)
         params['t_test'] = t_test
 
-    mission_time = st.number_input('Mission time (under nominal condition)',
+    cols = st.columns([1,1])
+
+    mission_time = cols[0].number_input('Mission time (under nominal condition)',
                     min_value=0.0, value=87600.0, step=1.0, format='%0.2f',
                     help=help_text)
     params['t_mission'] = mission_time
@@ -136,13 +157,14 @@ def show():
 
     cols = st.columns([1,1])
 
-    n_fail = cols[0].number_input('Allowed number of failures in accelerated test',
+    n_fail = cols[0].number_input('Allowed number of failures in (accelerated) test',
                              min_value=0, step=1)
     params['allowed_failures'] = n_fail
 
     beta = cols[1].number_input('Shape parameter of Weibull distribution',
                            min_value=0.0, max_value=10.0, value=1.0,
-                           step=1.0, format='%0.2f')
+                           step=1.0, format='%0.2f',
+                           help='Please read Short Guide before filling.')
     params['beta'] = beta
 
     use_af = st.checkbox('Use Acceleration Factor?')
@@ -183,7 +205,8 @@ def show():
         rdt = rdt_eq(**params)
 
         if approach == options[0]:
-            st.write(f'The optimal test time for this scenario is {rdt:.2f}')
+            st.info(f'The optimal {approach} for this scenario is \
+                    {rdt:.2f} units of time.')
         elif approach == options[1]:
-            st.write(f'The optimal number of speciments to be tested is {rdt:.1f}')
+            st.info(f'The optimal {approach} for this scenario is {rdt:.0f}.')
 
