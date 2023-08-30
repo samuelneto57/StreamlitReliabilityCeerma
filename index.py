@@ -58,13 +58,13 @@ if menu == list(modules)[1]:
     submenu = st.sidebar.selectbox(" ", list(modules[menu]),
                                    label_visibility="collapsed")
     if submenu == "Select a submodule":
-        functions.page_config(reduce_whitespace=True)
+        functions.page_config(hide_menu=True)
     else:
-        functions.page_config(submenu, reduce_whitespace=True)
+        functions.page_config(submenu, hide_menu=True)
     modules[menu][submenu]()
 else:
     if menu == "Select a module":
-        functions.page_config(reduce_whitespace=True)
+        functions.page_config(hide_menu=False)
     else:
-        functions.page_config(menu, reduce_whitespace=True)
+        functions.page_config(menu, hide_menu=True)
     modules[menu]()
