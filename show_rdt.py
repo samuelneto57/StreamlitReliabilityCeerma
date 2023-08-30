@@ -65,7 +65,7 @@ def show():
     st.write("""
     In this module, you can better design reliability tests by finding
     the optimal test time or number of units to be tested, given certain
-    defined test conditions. This
+    defined test conditions.
     """)
 
     with st.expander('Short Guide'):

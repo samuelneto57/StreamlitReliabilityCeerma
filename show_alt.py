@@ -16,11 +16,14 @@ def show():
     with st.expander('Short Guide'):
         st.write('When using this module, please take into consideration \
                  the following points:')
-        st.info('- There is no need to sort the data in any particular \
-                order as this is all done automatically;')
-        st.info('- For each stress level, number of failure points must be \
-                at least three.')
-        st.write(" ")
+        st.info("""
+        - There is no need to sort the data in any particular order as this
+        is all done automatically;
+        - For single-stress, number of failure points must be at least three
+        for each stress level;
+        - For dual-stress, number of failure points must be at least four for
+        each combination of stress levels.
+        """)
         st.write("""
         Accelerated Life Testing is implemented on Exponential, Weibull,
         Normal and Lognormal distributions. One of the parameters of the
@@ -34,16 +37,18 @@ def show():
         st.info("- L(S) function options are shown in Equation Information tab.")
 
     with st.expander("Equation Information"):
-        st.write("Single-stress models available:")
+        st.write("Life Model functions available:")
+        st.write("- Single-stress:")
         for item in distributions.alt_single_equations:
             st.latex(item)
-        st.write("Dual-stress models available:")
+        st.write("- Dual-stress:")
         for item in distributions.alt_dual_equations:
             st.latex(item)
         st.info("""Although named Power-Exponential, this Life-Stress Model
         actually applies Exponential to stress 1 and Power to stress 2. You
         can simply shift the order of your input columns to switch which
         stress is affected by each function.""")
+
 
     with st.expander("Data format"):
         st.info("""
@@ -53,10 +58,12 @@ def show():
         * Stress1 - stress level associated with this failure;
         * Stress2 (optional) - second stress level, for dual stress models.
         """)
-        df_show = {'Time': [620,632,685,822,380,416,460,596,216,146,332,400],
-                   'Type': ['F','F','F','F','F','F','F','F','F','F','F','F'],
-                   'Stress1':[348,348,348,348,348,348,348,348,378,378,378,378],
-                   'Stress2': [3,3,3,3,5,5,5,5,3,3,3,3],}
+        df_show = {
+            'Time': [620,632,685,822,380,416,460,596,216,146,332,400],
+            'Type': ['F','F','F','F','F','F','F','F','F','F','F','F'],
+            'Stress1':[348,348,348,348,348,348,348,348,378,378,378,378],
+            'Stress2': [3,3,3,3,5,5,5,5,3,3,3,3],
+        }
         df_show = pd.DataFrame.from_dict(df_show)
         st.write(df_show)
         st.info('The use level stress parameter is optional. \
@@ -78,29 +85,33 @@ def show():
     dual = False
     if uploaded_file:
         df = pd.read_excel(uploaded_file, header=head)
-        col2_2.dataframe(df)
-        df['Type'] = df['Type'].str.upper()
-        fdata = df[df['Type'] == 'F']
-        cdata = df[df['Type'] == 'C']
-        ftime = np.array(fdata.iloc[:,0])
-        ctime = np.array(cdata.iloc[:,0])
-        fstress_1 = np.array(fdata.iloc[:,2])
-        cstress_1 = np.array(cdata.iloc[:,2])
-        if len(df.columns) > 3:
-            dual = True
-            fstress_2 = np.array(fdata.iloc[:,3])
-            cstress_2 = np.array(cdata.iloc[:,3])
-        use_level = st.text_input("Use level stress (optional)")
-        if use_level:
-            use_level = use_level.strip().split(sep=',')
-            use_level = [int(x or 0) for x in use_level]
-            if dual and len(use_level) != 2:
-                st.error('Please enter two use level stresses!')
-            elif not dual and len(use_level) != 1:
-                st.error('Please enter one use level stress only!')
+        n_cols = len(df.columns)
+        if n_cols <= 2 or n_cols >= 5:
+            st.error('Please enter data according to the \
+                      "Data format" example!')
         else:
-            use_level = None
-        st.write(use_level)
+            col2_2.dataframe(df)
+            df['Type'] = df['Type'].str.upper()
+            fdata = df[df['Type'] == 'F']
+            cdata = df[df['Type'] == 'C']
+            ftime = np.array(fdata.iloc[:,0])
+            ctime = np.array(cdata.iloc[:,0])
+            fstress_1 = np.array(fdata.iloc[:,2])
+            cstress_1 = np.array(cdata.iloc[:,2])
+            if n_cols > 3:
+                dual = True
+                fstress_2 = np.array(fdata.iloc[:,3])
+                cstress_2 = np.array(cdata.iloc[:,3])
+            use_level = st.text_input("Use level stress (optional)")
+            if use_level:
+                use_level = use_level.strip().split(sep=',')
+                use_level = [float(x or 0) for x in use_level]
+                if dual and len(use_level) != 2:
+                    st.error('Please enter two use level stresses!')
+                elif not dual and len(use_level) != 1:
+                    st.error('Please enter one use level stress only!')
+            else:
+                use_level = None
 
     if dual:
         distr = distributions.alt_dual_distributions
@@ -108,7 +119,7 @@ def show():
         distr = distributions.alt_single_distributions
 
     include = st.multiselect('Choose which distribution(s) you want to \
-                            fit your data to:', list(distr))
+                              fit your data to:', list(distr))
 
     metric, method, ic = functions.fit_options(alt=True, include_CI=True)
 
@@ -184,7 +195,7 @@ def show():
         st.write('## Results of the best fitted ALT model')
         if use_level:
             st.write(f'**{best_model_name}**, whose mean life \
-                    is **{best_model.mean_life:.4f}** time units.')
+                       is **{best_model.mean_life:.4f}** time units.')
         else:
             st.write(f'**{best_model_name}**')
         st.write(best_model.results)
