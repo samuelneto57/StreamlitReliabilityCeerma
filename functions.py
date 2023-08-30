@@ -19,7 +19,6 @@ def page_config(title=None, hide_menu=False, reduce_whitespace=False):
     else:
         element = """
         <style>
-        #GithubIcon {visibility: hidden;}
         footer {visibility: hidden;}
         </style>
         """

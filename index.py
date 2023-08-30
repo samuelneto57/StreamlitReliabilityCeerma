@@ -64,7 +64,7 @@ if menu == list(modules)[1]:
     modules[menu][submenu]()
 else:
     if menu == "Select a module":
-        functions.page_config(hide_menu=False)
+        functions.page_config(hide_menu=True)
     else:
         functions.page_config(menu, hide_menu=True)
     modules[menu]()
