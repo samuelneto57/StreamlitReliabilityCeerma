@@ -29,8 +29,7 @@ exponential_equations = [
     r'R(t) =  e^{-\lambda t}',
     r'\text{HF: } h(t) = \lambda',
     r'\text{CHF: } H(t) = \lambda t',
-    r'\text{CHF: }'
-    r'\text{if using a location parameter γ, } t = t_{real} - γ',
+    r'\text{When using a location parameter γ, } t = t_{real} - γ',
 ]
 weibull_equations = [
     r'\alpha = \text{Scale parameter } (\alpha > 0 )',
@@ -41,7 +40,7 @@ weibull_equations = [
     r'R(t) =  e^{-(\frac{t}{\alpha})^\beta}',
     r'\text{HF: } h(t) = \frac{\beta}{\alpha}\left(\frac{t}{\alpha}\right)^{(\beta-1)}',
     r'\text{CHF: } H(t) = (\frac{t}{\alpha})^\beta',
-    r'\text{if using a location parameter γ, } t = t_{real} - γ',
+    r'\text{When using a location parameter γ, } t = t_{real} - γ',
 ]
 normal_equations = [
     r'\mu = \text{Location parameter } (-\infty<\mu<\infty)',
@@ -66,7 +65,7 @@ lognormal_equations = [
     r'R(t) =  1-\Phi\left(\frac{ln(t)-\mu}{\sigma}\right)=\Phi\left(\frac{\mu-ln(t)}{\sigma}\right)',
     r'\text{HF: } h(t) = \frac{\phi\left[\frac{ln(t)-\mu}{\sigma}\right]}{\sigma\left(\Phi\left[\frac{\mu-ln(t)}{\sigma}\right]\right)}',
     r'\text{CHF: } H(t) = -ln\left[1-\Phi\left(\frac{ln(t)-\mu}{\sigma}\right)\right]',
-    r'\text{if using a location parameter γ, } t = t_{real} - γ',
+    r'\text{When using a location parameter γ, } t = t_{real} - γ',
 ]
 beta_equations = [
     r'\alpha = \text{Shape parameter } (\alpha>0)',
@@ -94,7 +93,7 @@ gamma_equations = [
     r'R(t) =  \frac{\Gamma(\beta,\frac{t}{\alpha})}{\Gamma(\beta)}',
     r'\text{HF: } h(t) = \frac{t^{\beta-1}e^{-\frac{t}{\alpha}}}{\alpha^\beta\Gamma(\beta,\frac{t}{\alpha})}',
     r'\text{CHF: } H(t) = -ln\left[\frac{1}{\Gamma(\beta)}\Gamma(\beta,\frac{t}{\alpha})\right]',
-    r'\text{if using a location parameter γ, } t = t_{real} - γ',
+    r'\text{When using a location parameter γ, } t = t_{real} - γ',
 ]
 gumbel_equations = [
     r'\mu = \text{Location parameter } (-\infty<\mu<\infty)',
@@ -116,7 +115,7 @@ loglogistic_equations = [
     r'R(t) =  \frac{1}{1+(\frac{t}{\alpha})^{\beta}}',
     r'\text{HF: } h(t) = \frac{\frac{\beta}{\alpha}(\frac{t}{\alpha})^{\beta-1}}{1+(\frac{t}{\alpha})^\beta}',
     r'\text{CHF: } H(t) = -ln\left(1+(\frac{t}{\alpha})^{\beta}\right)',
-    r'\text{if using a location parameter γ, } t = t_{real} - γ',
+    r'\text{When using a location parameter γ, } t = t_{real} - γ',
 ]
 
 

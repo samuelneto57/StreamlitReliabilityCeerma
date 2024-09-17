@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 import distributions
 import functions
@@ -18,7 +19,6 @@ def show():
         for equat in distr[distribution_name]['equations']:
             st.latex(equat)
 
-    dist_print = ''
     var = []
     variables = distr[distribution_name]['variables']
     cols = st.columns([1]*len(variables))
@@ -31,15 +31,12 @@ def show():
             format='%0.5f'
         )
         var.append(to_append)
-        dist_print = dist_print + f'{variable[-1]}: {to_append}\n'
 
     plot_params = functions.plot_parameters()
 
     if st.button("Plot distribution"):
 
         dist = distr[distribution_name]['distribution'](*var)
-
-        st.write(dist_print)
 
         if distribution_name == "Beta Distribution" \
             and (var[0] <=1 or var[1] <=1):
@@ -50,12 +47,15 @@ def show():
 
         if distribution_name == "Loglogistic Distribution" and var[1] <=1:
             functions.plot_distribution(
-                dist, plot_params,
+                dist,
+                plot_params,
                 title=dist.param_title_long,
                 plot=False
             )
             st.write("No plot when beta is less than or equal to 1")
         else:
             functions.plot_distribution(
-                dist, plot_params, title=dist.param_title_long
+                dist,
+                plot_params,
+                title=dist.param_title_long
             )

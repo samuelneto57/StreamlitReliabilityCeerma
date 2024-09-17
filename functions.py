@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from reliability.Probability_plotting import plotting_positions
 
 
@@ -193,12 +194,13 @@ def plot_distribution(dist, plot_params, *, title='',
 
         properties_text = fr""
         for statistic in properties:
-            properties_text += fr"{statistic}: {properties[statistic]}\n"
+            properties_text += f"{statistic}: {properties[statistic]}  \n"
 
-        properties_table = {
-            "Statistic": [statistic for statistic in properties],
-            "Value": [properties[statistic] for statistic in properties],
-        }
+        properties_table = pd.DataFrame.from_dict(
+            properties,
+            orient='index',
+            columns=['Statistic'],
+        )
 
         if sidetable is not None:
             cols = st.columns([2,1])
