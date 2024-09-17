@@ -21,3 +21,8 @@ def check_authentication(
     if authorized != True:
         st.error(message)
         st.stop()
+
+
+#### Usage: paste the following code to your app.py (or similar) streamlit file
+# import authentication_streamlit
+# authentication_streamlit.check_authentication()
