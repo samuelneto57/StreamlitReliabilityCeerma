@@ -171,27 +171,44 @@ def plot_distribution(dist, plot_params, *, title='',
                       non_parametric=False, par=None):
 
     if not non_parametric:
+        properties = {
+            'Mean': \
+                f"{dist.mean:.{plot_params['decimals']}f}",
+            'Median': \
+                f"{dist.median:.{plot_params['decimals']}f}",
+            'Mode': \
+                f"{dist.mode}" if isinstance(dist.mode, str) \
+                else f"{dist.mode:.{plot_params['decimals']}f}",
+            'Variance': \
+                f"{dist.variance:.{plot_params['decimals']}f}",
+            'Std. Deviation': \
+                f"{dist.standard_deviation:.{plot_params['decimals']}f}",
+            'Skewness': \
+                f"{dist.skewness:.{plot_params['decimals']}f}",
+            'Kurtosis': \
+                f"{dist.kurtosis:.{plot_params['decimals']}f}",
+            'Excess Kurtosis': \
+                f"{dist.excess_kurtosis:.{plot_params['decimals']}f}",
+        }
+
+        properties_text = fr""
+        for statistic in properties:
+            properties_text += fr"{statistic}: {properties[statistic]}\n"
+
+        properties_table = {
+            "Statistic": [statistic for statistic in properties]
+            "Value": [properties[statistic] for statistic in properties],
+        }
+
         if sidetable is not None:
-            cols = st.columns([1,2])
-            cols[1].dataframe(sidetable, use_container_width=True)
-            # format = '{:.' + str(plot_params['decimals']) + 'f}'
-            # cols[1].dataframe(sidetable.style.format(format),
-            #                   use_container_width=True)
+            cols = st.columns([2,1])
+            cols[0].dataframe(sidetable, use_container_width=True)
+            # cols[1].write(properties_text)
+            cols[1].dataframe(properties_table, use_container_width=True)
         else:
             cols = st.columns([1])
-
-        properties = fr"""
-        Mean: {dist.mean:.{plot_params['decimals']}f}
-        Median: {dist.median:.{plot_params['decimals']}f}
-        Mode:  {f"{dist.mode}" if isinstance(dist.mode,
-        str) else f"{dist.mode:.{plot_params['decimals']}f}"}
-        Variance: {dist.variance:.{plot_params['decimals']}f}
-        Std. Deviation: {dist.standard_deviation:.{plot_params['decimals']}f}
-        Skewness: {dist.skewness:.{plot_params['decimals']}f}
-        Kurtosis: {dist.kurtosis:.{plot_params['decimals']}f}
-        Excess Kurtosis: {dist.excess_kurtosis:.{plot_params['decimals']}f}
-        """
-        cols[0].write(properties)
+            # cols[0].write(properties_text)
+            cols[0].dataframe(properties_table, use_container_width=True)
 
     if plot:
         # Points of X axis

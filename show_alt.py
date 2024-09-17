@@ -90,7 +90,7 @@ def show():
             st.error('Please enter data according to the \
                       "Data format" example!')
         else:
-            col2_2.dataframe(df)
+            col2_2.dataframe(df, use_container_width=True)
             df['Type'] = df['Type'].str.upper()
             fdata = df[df['Type'] == 'F']
             cdata = df[df['Type'] == 'C']
@@ -148,19 +148,20 @@ def show():
 
         best_BIC, best_AICc, best_loglik = np.inf, np.inf, np.inf
         results = pd.DataFrame(
-                    columns=[
-                        "ALT_model",
-                        "a",
-                        "b",
-                        "c",
-                        "n",
-                        "beta",
-                        "sigma",
-                        "Log-LH",
-                        "AICc",
-                        "BIC",
-                    ]
-                )
+            columns=[
+                "ALT_model",
+                "a",
+                "b",
+                "c",
+                "n",
+                "beta",
+                "sigma",
+                "Log-LH",
+                "AICc",
+                "BIC",
+            ],
+            use_container_width=True,
+        )
 
         for item in include:
             res = distr[item](*function_parameters)

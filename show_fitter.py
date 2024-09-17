@@ -35,7 +35,7 @@ def show():
                                          label_visibility="collapsed")
     if uploaded_file:
         df = pd.read_excel(uploaded_file, names=['Time', 'Type'], header=head)
-        col2_2.dataframe(df)
+        col2_2.dataframe(df, use_container_width=True)
         df['Type'] = df['Type'].str.upper()
         fdata = df[df['Type'] == 'F']
         cdata = df[df['Type'] == 'C']
@@ -163,7 +163,7 @@ def show():
             dist = distr[include](failures=fdata, right_censored=cdata, CI=ci,
                                   show_plot=False, print_results=False)
 
-            #Parametric comparison
+            # Parametric comparison
             if par == True:
                 results = Fit_Everything(failures=fdata,
                                          right_censored=cdata,

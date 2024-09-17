@@ -764,7 +764,9 @@ class MCF_nonparametric:
         times = np.hstack([repair_times, end_times])
         states = np.hstack([F_array, C_array])
         data = {"times": times, "states": states}
-        df = pd.DataFrame(data, columns=["times", "states"])
+        df = pd.DataFrame(
+            data, columns=["times", "states"], use_container_width=True
+        )
         # Sorts the df by times and then by states
         # This ensures that states are F then C where the same time occurs
         # This ensures a failure is counted then the item is retired
@@ -867,8 +869,16 @@ class MCF_nonparametric:
             "variance": Var_array,
         }
         printable_results = pd.DataFrame(
-            data, columns=["state", "time", "MCF_lower",
-                           "MCF", "MCF_upper", "variance"]
+            data,
+            columns=[
+                "state",
+                "time",
+                "MCF_lower",
+                "MCF",
+                "MCF_upper",
+                "variance"
+            ],
+            use_container_width=True,
         )
 
         indices_to_drop = printable_results[
@@ -1120,6 +1130,7 @@ class MCF_parametric:
                 "Lower CI",
                 "Upper CI",
             ],
+            use_container_width=True,
         )
 
         if print_results is True:
@@ -1290,7 +1301,7 @@ def show():
             type="xlsx", accept_multiple_files=False)
         if uploaded_file:
             aux = pd.read_excel(uploaded_file)
-            col2_2.dataframe(aux)
+            col2_2.dataframe(aux, use_container_width=True)
             data = []
             for col in aux.columns:
                 cleanedList = [
@@ -1344,7 +1355,7 @@ def show():
         if uploaded_file:
             data = pd.read_excel(uploaded_file)
             if df.shape[1] == 1:
-                col2_2.dataframe(data)
+                col2_2.dataframe(data, use_container_width=True)
                 for col in data.columns:
                     times = np.cumsum(data[col].to_numpy())
             else:
@@ -1387,7 +1398,7 @@ def show():
         if uploaded_file:
             data = pd.read_excel(uploaded_file)
             if df.shape[1] == 1:
-                col2_2.dataframe(data)
+                col2_2.dataframe(data, use_container_width=True)
                 for col in data.columns:
                     times = np.cumsum(data[col].to_numpy())
             else:
