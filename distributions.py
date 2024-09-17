@@ -26,19 +26,22 @@ exponential_equations = [
     r'\text{Limits: } (t \geq 0) ',
     r'\text{PDF: } f(t) = \lambda e^{-\lambda t}',
     r'\text{CDF: } F(t) = 1 - \lambda e^{-\lambda t}',
-    r'\text{SF: } R(t) = e^{-\lambda t}',
+    r'R(t) =  e^{-\lambda t}',
     r'\text{HF: } h(t) = \lambda',
     r'\text{CHF: } H(t) = \lambda t',
+    r'\text{CHF: }'
+    r'\text{if using a location parameter γ, } t = t_{real} - γ',
 ]
 weibull_equations = [
     r'\alpha = \text{Scale parameter } (\alpha > 0 )',
     r'\beta = \text{Shape parameter } (\beta > 0 )',
     r'\text{Limits: } (t \leq 0) ',
-    r'\text{PDF: } f(t) = \frac{\betat^{\beta-1}}{\alpha^\beta}e^{\frac{t}{\alpha}^\beta}=\frac{\beta}{\alpha}\left(\frac{t}{\alpha}\right)^{(\beta-1)}e^{-(\frac{t}{\alpha})^\beta}',
+    r'\text{PDF: } f(t) = \frac{\beta}{\alpha}\left(\frac{t}{\alpha}\right)^{(\beta-1)}e^{-(\frac{t}{\alpha})^\beta}',
     r'\text{CDF: } F(t) = 1-e^{-(\frac{t}{\alpha})^\beta}',
-    r'\text{SF: } R(t) = e^{-(\frac{t}{\alpha})^\beta}',
+    r'R(t) =  e^{-(\frac{t}{\alpha})^\beta}',
     r'\text{HF: } h(t) = \frac{\beta}{\alpha}\left(\frac{t}{\alpha}\right)^{(\beta-1)}',
     r'\text{CHF: } H(t) = (\frac{t}{\alpha})^\beta',
+    r'\text{if using a location parameter γ, } t = t_{real} - γ',
 ]
 normal_equations = [
     r'\mu = \text{Location parameter } (-\infty<\mu<\infty)',
@@ -46,9 +49,9 @@ normal_equations = [
     r'\text{Limits: } (-\infty<t<\infty) ',
     r'\text{PDF: } f(t) = \frac{1}{\sigma\sqrt{2\pi}} e^{\frac{1}{2}\left(\frac{t-\mu}{\sigma}\right)^2}=\frac{1}{\sigma}\phi\left[\frac{t-\mu}{\sigma}\right]',
     r'\text{Where } \phi\text{ is the standard normal PDF with }\mu=0\text{ and }\sigma=1',
-    r'\text{CDF: } F(t) = \frac{1}{\sigma\sqrt{2\pi}}\int^t_{-\infty}e^{\left[-\frac{1}{2}\left(\frac{\theta-\mu}{\sigma}\right)^2\right]d\theta}=\frac{1}{2}+\frac{1}{2}erf\left(\frac{t-\mu}{\sigma\sqrt{2}}\right)=\Phi\left(\frac{t-\mu}{\sigma}\right)',
+    r'\text{CDF: } F(t) = \frac{1}{\sigma\sqrt{2\pi}}\int^t_{-\infty}e^{\left[-\frac{1}{2}\left(\frac{\theta-\mu}{\sigma}\right)^2\right]d\theta}=\Phi\left(\frac{t-\mu}{\sigma}\right)',
     r'\text{Where } \Phi\text{ is the standard normal CDF with }\mu=0\text{ and }\sigma=1',
-    r'\text{SF: } R(t) = 1-\Phi\left(\frac{t-\mu}{\sigma}\right)=\Phi\left(\frac{\mu-t}{\sigma}\right)',
+    r'R(t) =  1-\Phi\left(\frac{t-\mu}{\sigma}\right)=\Phi\left(\frac{\mu-t}{\sigma}\right)',
     r'\text{HF: } h(t) = \frac{\phi\left[\frac{t-\mu}{\sigma}\right]}{\sigma\left(\Phi\left[\frac{\mu-t}{\sigma}\right]\right)}',
     r'\text{CHF: } H(t) = -ln\left[\Phi\left(\frac{\mu-t}{\sigma}\right)\right]',
 ]
@@ -58,24 +61,25 @@ lognormal_equations = [
     r'\text{Limits: } (t \leq 0)',
     r'\text{PDF: } f(t) = \frac{1}{\sigma t\sqrt{2\pi}}e^{-\frac{1}{2}\left(\frac{ln(t)-\mu}{\sigma}\right)^2}=\frac{1}{\sigma t}\phi\left[\frac{ln(t)-\mu}{\sigma}\right]',
     r'\text{Where } \phi \text{ is the standard normal PDF with }\mu=0\text{ and }\sigma=1 ',
-    r'\text{CDF: } F(t) = \frac{1}{\sigma\sqrt{2\pi}}\int^t_{0}\frac{1}{\theta}e^{\left[-\frac{1}{2}\left(\frac{ln(\theta)-\mu}{\sigma}\right)^2\right]d\theta}=\frac{1}{2}+\frac{1}{2}erf\left(\frac{ln(t)-\mu}{\sigma\sqrt{2}}\right)=\Phi\left(\frac{ln(t)-\mu}{\sigma}\right)',
+    r'\text{CDF: } F(t) = \frac{1}{\sigma\sqrt{2\pi}}\int^t_{0}\frac{1}{\theta}e^{\left[-\frac{1}{2}\left(\frac{ln(\theta)-\mu}{\sigma}\right)^2\right]d\theta}=\Phi\left(\frac{ln(t)-\mu}{\sigma}\right)',
     r'\text{Where } \Phi \text{ is the standard normal CDF with }\mu=0\text{ and }\sigma=1',
-    r'\text{SF: } R(t) = 1-\Phi\left(\frac{ln(t)-\mu}{\sigma}\right)=\Phi\left(\frac{\mu-ln(t)}{\sigma}\right)',
+    r'R(t) =  1-\Phi\left(\frac{ln(t)-\mu}{\sigma}\right)=\Phi\left(\frac{\mu-ln(t)}{\sigma}\right)',
     r'\text{HF: } h(t) = \frac{\phi\left[\frac{ln(t)-\mu}{\sigma}\right]}{\sigma\left(\Phi\left[\frac{\mu-ln(t)}{\sigma}\right]\right)}',
     r'\text{CHF: } H(t) = -ln\left[1-\Phi\left(\frac{ln(t)-\mu}{\sigma}\right)\right]',
+    r'\text{if using a location parameter γ, } t = t_{real} - γ',
 ]
 beta_equations = [
     r'\alpha = \text{Shape parameter } (\alpha>0)',
     r'\beta = \text{Shape parameter } (\beta>0)',
     r'\text{Limits: } (0 \leq t \leq1)',
-    r'\text{PDF: } f(t) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}t^{\alpha-1}(1-t)^{\beta-1}=\frac{1}{B(\alpha,\beta}t^{\alpha -1}(1-t)^{\beta-1}',
+    r'\text{PDF: } f(t) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}t^{\alpha-1}(1-t)^{\beta-1}=\frac{t^{\alpha -1}(1-t)^{\beta-1}}{B(\alpha,\beta)}',
     r'\text{Where } \Gamma(x) \text{ is the complete gamma function. } \Gamma(x)=\int^\infty_{0}t^{x-1}e^{-t}dt',
     r'\text{Where } B(x,y) \text{ is the complete beta function. } B(x,y)=\int^{1}_{0}(1- t)^{y-1}dt',
     r'\text{CDF: } F(t) = \frac{\Gamma(\alpha +\beta)}{\Gamma(\alpha)\Gamma(\beta)}\int^{t}_{0}\theta^{\alpha-1}(1-\theta^{\beta-1}d\theta=\frac{B_t(t|\alpha,\beta)}{B(\alpha,\beta)}=I_t(t|\alpha,\beta)',
     r'\text{Where } B_t(t|x,y) \text{  is the incomplete beta function.} B_t(t|x,y)=\int^{t}_{0}\theta^{x-1}(1-\theta)^{y-1}d\theta',
     r'\text{Where } I_t(t|x,y) \text{ is the regularized incomplete beta function which is defined in terms}',
     r'\text{ of the incomplete beta function and the complete beta function.} I_t(t|x,y)=\frac{B_t(t|x,y)}{B_t(x,y)}',
-    r'\text{SF: } R(t) = 1-I_t(t|\alpha,\beta)',
+    r'R(t) =  1-I_t(t|\alpha,\beta)',
     r'\text{HF: } h(t) = \frac{t^{y-1}(1-t)}{B(\alpha,\beta)-B_t(t|\alpha,\beta)}',
     r'\text{CHF: } H(t) = -ln\left[1-I_t(t|\alpha,\beta)\right]',
 ]
@@ -87,9 +91,10 @@ gamma_equations = [
     r'\text{Where } \Gamma(x)\text{ is the complete gamma function. }\Gamma(x)=\int^\infty_{0}t^{x-1}e^{-t} dt',
     r'\text{CDF: } F(t) = \frac{1}{\Gamma(\beta)}\gamma(\beta,\frac{t}{\alpha})',
     r'\text{Where } \gamma(x,y) \text{ is the lower incomplete gamma function. }\gamma(x,y)=\frac{1}{\Gamma(x)}\int^y_{0}t^{x-1}e^{-t}dt',
-    r'\text{SF: } R(t) = \frac{1}{\Gamma(\beta)}\Gamma(\beta,\frac{t}{\alpha})',
+    r'R(t) =  \frac{\Gamma(\beta,\frac{t}{\alpha})}{\Gamma(\beta)}',
     r'\text{HF: } h(t) = \frac{t^{\beta-1}e^{-\frac{t}{\alpha}}}{\alpha^\beta\Gamma(\beta,\frac{t}{\alpha})}',
     r'\text{CHF: } H(t) = -ln\left[\frac{1}{\Gamma(\beta)}\Gamma(\beta,\frac{t}{\alpha})\right]',
+    r'\text{if using a location parameter γ, } t = t_{real} - γ',
 ]
 gumbel_equations = [
     r'\mu = \text{Location parameter } (-\infty<\mu<\infty)',
@@ -98,7 +103,7 @@ gumbel_equations = [
     r'\text{PDF: } f(t) = \frac{1}{\sigma}e^{z-e^{z}}',
     r'\text{Where } z = \frac{t-\mu}{\sigma}',
     r'\text{CDF: } F(t) = 1-e^{-e^{z}}',
-    r'\text{SF: } R(t) = e^{-e^{z}}',
+    r'R(t) =  e^{-e^{z}}',
     r'\text{HF: } h(t) = \frac{e^{z}}{\sigma}',
     r'\text{CHF: } H(t) = e^{z}',
 ]
@@ -108,9 +113,10 @@ loglogistic_equations = [
     r'\text{Limits: } ( t \leq 0 )',
     r'\text{PDF: } f(t) = \frac{\frac{\beta}{\alpha}(\frac{t}{\alpha})^{\beta-1}}{\left(1+(\frac{t}{\alpha})^\beta\right)^2}',
     r'\text{CDF: } F(t) = \frac{1}{1+(\frac{t}{\alpha})^{-\beta}}=\frac{(\frac{t}{\alpha})^{\beta}}{1+(\frac{t}{\alpha})^{\beta}}=\frac{t^{\beta}}{\alpha^{\beta}+t^{\beta}}',
-    r'\text{SF: } R(t) = \frac{1}{1+(\frac{t}{\alpha})^{\beta}}',
+    r'R(t) =  \frac{1}{1+(\frac{t}{\alpha})^{\beta}}',
     r'\text{HF: } h(t) = \frac{\frac{\beta}{\alpha}(\frac{t}{\alpha})^{\beta-1}}{1+(\frac{t}{\alpha})^\beta}',
     r'\text{CHF: } H(t) = -ln\left(1+(\frac{t}{\alpha})^{\beta}\right)',
+    r'\text{if using a location parameter γ, } t = t_{real} - γ',
 ]
 
 
