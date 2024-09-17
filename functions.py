@@ -7,6 +7,15 @@ import pandas as pd
 from reliability.Probability_plotting import plotting_positions
 
 
+def write_text_align(text='Hello World!', align='justify'):
+    assert align in {'center', 'left', 'right', 'justify'},\
+        'Text align must be one of: "center", "left", "right" or "justify"'
+    st.markdown(
+        f'<div style="text-align: {align};">{text}</div>',
+        unsafe_allow_html=True
+    )
+
+
 def page_config(title=None, hide_menu=False, reduce_whitespace=False):
     if hide_menu:
         element = """

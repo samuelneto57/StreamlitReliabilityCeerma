@@ -18,7 +18,7 @@ image_ufpe = Image.open('./src/logo.png')
 image_pip = Image.open('./src/logopip.png')
 image_ceerma = Image.open('./src/favicon.png')
 
-st.set_page_config(page_title="Reliability",
+st.set_page_config(page_title="ReMDA",
                    page_icon=image_ceerma,layout="wide",
                    initial_sidebar_state="expanded")
 
@@ -32,12 +32,18 @@ st.sidebar.markdown(
 
 st.sidebar.image(image_ufpe)
 
-st.sidebar.title("📈 Reliability app")
+st.sidebar.title("📈 ReMDA")
 
-st.sidebar.write("""
-This app is an easy-to-use interface built in Streamlit for reliability
-related analysis and visualization using the Reliability Python library.
-""")
+st.sidebar.caption("Reliability Modelling and Data Analysis")
+
+with st.sidebar:
+    functions.write_text_align(
+    """
+    This app is an easy-to-use interface built in Streamlit for reliability
+    related analysis and visualization using the Reliability Python library.
+    """,
+    align='justify'
+    )
 
 submodules = {
     "Select a submodule": lambda: None,
