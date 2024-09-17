@@ -196,7 +196,7 @@ def plot_distribution(dist, plot_params, *, title='',
             properties_text += fr"{statistic}: {properties[statistic]}\n"
 
         properties_table = {
-            "Statistic": [statistic for statistic in properties]
+            "Statistic": [statistic for statistic in properties],
             "Value": [properties[statistic] for statistic in properties],
         }
 
