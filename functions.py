@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from reliability.Probability_plotting import plotting_positions
+from streamlit.components.v1 import html
 
 
 def write_text_align(text='Hello World!', align='justify'):
@@ -53,6 +54,11 @@ def page_config(title=None, hide_menu=False, reduce_whitespace=False):
         # """
 
     st.markdown(element, unsafe_allow_html=True)
+    html('''
+       <script>
+        window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
+      </script>
+    ''')
 
 
 def plot_parameters(*, n_points=True, decimals=True, stats=True,
