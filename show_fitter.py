@@ -122,9 +122,9 @@ def show():
                         results_table.iloc[i,j] = ''
             st.dataframe(results_table, use_container_width=True)
 
-            st.write('### Results of the best fitted distribution')
             dist = results.best_distribution
             distribution_name = results.best_distribution_name
+            st.write(f'### Results of the best fitted distribution: {distribution_name}')
 
             percentiles = np.linspace(1, 99, num=99)
 

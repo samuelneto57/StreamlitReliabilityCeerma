@@ -91,9 +91,9 @@ def show():
                       "Data format" example!')
         else:
             col2_2.dataframe(df, use_container_width=True)
-            df['Type'] = df['Type'].str.upper()
-            fdata = df[df['Type'] == 'F']
-            cdata = df[df['Type'] == 'C']
+            df.iloc[:,1] = df.iloc[:,1].str.upper()
+            fdata = df[df.iloc[:,1] == 'F']
+            cdata = df[df.iloc[:,1] == 'C']
             ftime = np.array(fdata.iloc[:,0])
             ctime = np.array(cdata.iloc[:,0])
             fstress_1 = np.array(fdata.iloc[:,2])
@@ -160,7 +160,6 @@ def show():
                 "AICc",
                 "BIC",
             ],
-            use_container_width=True,
         )
 
         for item in include:
