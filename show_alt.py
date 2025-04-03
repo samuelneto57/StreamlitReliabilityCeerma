@@ -70,8 +70,8 @@ def show():
                 If single stress model, enter only one value. For example:')
         st.write('323')
         st.info('If dual stress model, enter two values \
-                separated by ",". For example:')
-        st.write('323, 2')
+                separated by ";". For example:')
+        st.write('323; 2')
 
     header = st.checkbox("Does your data contain header?", value=True)
     head = 0 if header else None
@@ -89,6 +89,7 @@ def show():
         if n_cols <= 2 or n_cols >= 5:
             st.error('Please enter data according to the \
                       "Data format" example!')
+            st.stop()
         else:
             col2_2.dataframe(df, use_container_width=True)
             df.iloc[:,1] = df.iloc[:,1].str.upper()
@@ -102,16 +103,39 @@ def show():
                 dual = True
                 fstress_2 = np.array(fdata.iloc[:,3])
                 cstress_2 = np.array(cdata.iloc[:,3])
+
+            n_stress1 = np.unique(df.iloc[:,2])
+            if dual:
+                n_stress2 = np.unique(df.iloc[:,3])
+                for s1 in n_stress1:
+                    for s2 in n_stress2:
+                        aux = df[df.iloc[:,2] == s1]
+                        aux = aux[aux.iloc[:,3] == s2]
+                        aux = aux[aux.iloc[:,1] == 'F']
+                        if len(aux) > 0 and len(aux) < 4:
+                            st.error('All combinations of stress levels must have at least 4 failures!')
+                            st.stop()
+            else:
+                for s1 in n_stress1:
+                    aux = df[df.iloc[:,2] == s1]
+                    aux = aux[aux.iloc[:,1] == 'F']
+                    if len(aux) > 0 and len(aux) < 4:
+                        st.error('All stress levels must have at least 3 failures!')
+                        st.stop()
+
             use_level = st.text_input("Use level stress (optional)")
             if use_level:
-                use_level = use_level.strip().split(sep=',')
+                use_level = use_level.strip().split(sep=';')
                 use_level = [float(x or 0) for x in use_level]
                 if dual and len(use_level) != 2:
                     st.error('Please enter two use level stresses!')
+                    st.stop()
                 elif not dual and len(use_level) != 1:
                     st.error('Please enter one use level stress only!')
+                    st.stop()
             else:
                 use_level = None
+
 
     if dual:
         distr = distributions.alt_dual_distributions
