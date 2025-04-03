@@ -85,6 +85,13 @@ def show():
     dual = False
     if uploaded_file:
         df = pd.read_excel(uploaded_file, header=head)
+
+        string_cols = list(df.select_dtypes(include=['object', 'string']).columns)
+        first_string_col_index = df.columns.get_loc(string_cols[0])
+        if first_string_col_index > 1:
+            delete_cols = list(range(first_string_col_index-1))
+            df = df.drop(df.columns[delete_cols], axis=1)
+
         n_cols = len(df.columns)
         if n_cols <= 2 or n_cols >= 5:
             st.error('Please enter data according to the \
